@@ -137,7 +137,7 @@ async function doReview(action) {
         }
       }
       showSuccessToast(actionLabels[action] + '操作完成')
-      router.back()
+      setTimeout(() => router.back(), 800)
     } else {
       showFailToast(data.message || '操作失败')
     }
