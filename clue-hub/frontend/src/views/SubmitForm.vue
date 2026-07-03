@@ -29,8 +29,12 @@
         <van-field v-model="form.clueType" label="线索类型" is-link readonly @click="showClueTypePicker = true" required
           placeholder="请选择线索类型" :rules="[{ required: true }]" />
         <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" placeholder="请说明" />
-        <van-field v-model="form.clueDesc" label="线索描述" type="textarea" rows="5" placeholder="3-5句话说明：是什么 + 为什么是机会" maxlength="500" required
-          :rules="[{ required: true, message: '请填写线索描述' }]" show-word-limit />
+        <div class="field-label required">线索描述</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.clueDesc" class="desc-textarea" rows="6"
+            placeholder="3-5句话说明：是什么 + 为什么是机会" maxlength="500" />
+          <div class="desc-count">{{ form.clueDesc.length }} / 500</div>
+        </div>
       </template>
 
       <!-- 第三步：线索来源 -->
@@ -45,7 +49,12 @@
 
         <van-field v-model="form.reliability" label="信息可靠度" is-link readonly required
           @click="showReliabilityPicker = true" placeholder="请选择" />
-        <van-field v-model="form.marketSize" label="预计市场规模" placeholder="请填写预计市场规模" required />
+        <div class="field-label required">预计市场规模</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.marketSize" class="desc-textarea" rows="6"
+            placeholder="请描述预计市场规模、增长趋势及相关数据" maxlength="500" />
+          <div class="desc-count">{{ form.marketSize.length }} / 500</div>
+        </div>
       </template>
 
       <!-- 第四步：线索判断 -->
@@ -479,5 +488,35 @@ function formatSize(bytes) {
   color: #ee0a24;
   font-size: 16px;
   cursor: pointer;
+}
+
+.desc-textarea-wrapper {
+  margin: 0 16px;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.desc-textarea {
+  width: 100%;
+  min-height: 140px;
+  padding: 12px;
+  border: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #323233;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+}
+.desc-textarea::placeholder {
+  color: #c8c9cc;
+}
+.desc-count {
+  text-align: right;
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  color: #999;
+  background: #fff;
 }
 </style>
