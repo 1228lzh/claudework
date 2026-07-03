@@ -82,6 +82,7 @@ const tabs = [
 
 const statusMap = {
   new: '新建',
+  pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
   ipd_review: 'IPD立项',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',

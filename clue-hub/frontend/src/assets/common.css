@@ -67,6 +67,7 @@ html, body {
 }
 
 .stage-tag.new { background: #f5f5f5; color: #999; }
+.stage-tag.pending_supplement { background: #fff7e6; color: #fa8c16; }
 .stage-tag.initial_screening { background: #fff7e6; color: #fa8c16; }
 .stage-tag.judging { background: #e6f7ff; color: #1890ff; }
 .stage-tag.verifying { background: #f9f0ff; color: #722ed1; }

@@ -100,6 +100,7 @@ const approvedCount = computed(() =>
 
 const statusMap = {
   new: '新建',
+  pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
   ipd_review: 'IPD立项',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',
@@ -129,10 +130,10 @@ function onRefresh() {
 
 function goToClue(clue) {
   if (clue.status === 'new') {
-    // 暂存线索 → 进入编辑模式
     router.push(`/submit?edit=${clue.id}`)
+  } else if (clue.status === 'pending_supplement') {
+    router.push(`/clue/${clue.id}`)
   } else {
-    // 已提交线索 → 查看详情
     router.push(`/clue/${clue.id}`)
   }
 }

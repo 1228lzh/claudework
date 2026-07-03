@@ -9,34 +9,82 @@
         <span class="clue-no">{{ clue.clueNo }}</span>
       </div>
 
-      <!-- 一审：谁报的 -->
-      <van-cell-group title="谁报的">
-        <van-cell title="报备人" :value="clue.reporterName" />
-        <van-cell title="部门/单位" :value="clue.reporterDept || '-'" />
-        <van-cell title="联系方式" :value="clue.reporterContact || '-'" />
-      </van-cell-group>
+      <!-- 待补充模式：平铺可编辑 -->
+      <template v-if="clue.status === 'pending_supplement'">
+        <van-cell-group title="谁报的">
+          <van-field v-model="form.reporterName" label="报备人" placeholder="请输入姓名" />
+          <van-field v-model="form.reporterDept" label="部门/单位" placeholder="请输入部门/单位" />
+          <van-field v-model="form.reporterContact" label="联系方式" placeholder="请输入联系方式" />
+        </van-cell-group>
 
-      <!-- 二审：什么线索 -->
-      <van-cell-group title="什么线索">
-        <van-cell title="线索名称" :value="clue.clueName" />
-        <van-cell title="线索类型" :value="clue.clueType" />
-        <van-cell title="线索描述" :label="clue.clueDesc" />
-      </van-cell-group>
+        <van-cell-group title="什么线索">
+          <van-field v-model="form.clueName" label="线索名称" placeholder="一句话描述，不超过50字" maxlength="50" />
+          <van-field v-model="form.clueType" label="线索类型" is-link readonly @click="showClueTypePicker = true" placeholder="请选择线索类型" />
+          <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" placeholder="请说明" />
+          <div class="field-label">线索描述</div>
+          <div class="desc-textarea-wrapper">
+            <textarea v-model="form.clueDesc" class="desc-textarea" rows="5"
+              placeholder="3-5句话说明：是什么 + 为什么是机会" maxlength="500" />
+            <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
+          </div>
+        </van-cell-group>
 
-      <!-- 三审：线索来源 -->
-      <van-cell-group title="线索来源">
-        <van-cell title="信息来源" :value="clue.infoSource || '-'" />
-        <van-cell title="可靠度" :value="clue.reliability || '-'" />
-        <van-cell title="预计市场规模" :value="clue.marketSize || '-'" />
-      </van-cell-group>
+        <van-cell-group title="线索来源">
+          <div class="field-label">信息来源（可多选）</div>
+          <van-checkbox-group v-model="form.infoSourceArr" direction="horizontal" class="cb-group">
+            <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+          </van-checkbox-group>
+          <van-field v-if="form.infoSourceArr.includes('其他')" v-model="form.infoSourceOther" label="其他来源" placeholder="请说明" />
+          <van-field v-model="form.reliability" label="信息可靠度" is-link readonly @click="showReliabilityPicker = true" placeholder="请选择" />
+          <div class="field-label">预计市场规模</div>
+          <div class="desc-textarea-wrapper">
+            <textarea v-model="form.marketSize" class="desc-textarea" rows="4"
+              placeholder="请描述预计市场规模、增长趋势及相关数据" maxlength="500" />
+            <div class="desc-count">{{ (form.marketSize || '').length }} / 500</div>
+          </div>
+        </van-cell-group>
 
-      <!-- 四审：线索判断 -->
-      <van-cell-group title="线索判断">
-        <van-cell title="涉及品类" :value="clue.productLines || '-'" />
-        <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
-        <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
-        <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
-      </van-cell-group>
+        <van-cell-group title="线索判断">
+          <div class="field-label">涉及品类/产品线（可多选）</div>
+          <van-checkbox-group v-model="form.productLinesArr" direction="horizontal" class="cb-group">
+            <van-checkbox v-for="item in productLineOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+          </van-checkbox-group>
+          <van-field v-if="form.productLinesArr.includes('全品类')" v-model="form.productLinesDetail" label="全品类说明" placeholder="请说明具体品类" />
+          <div class="field-label">目标客户群体（可多选）</div>
+          <van-checkbox-group v-model="form.targetCustomersArr" direction="horizontal" class="cb-group">
+            <van-checkbox v-for="item in customerOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+          </van-checkbox-group>
+          <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" placeholder="请说明" />
+          <van-field v-model="form.urgency" label="时间紧迫度" is-link readonly @click="showUrgencyPicker = true" placeholder="请选择" />
+          <van-field v-model="form.productStatus" label="竞品情况（选填）" is-link readonly @click="showProductStatusPicker = true" placeholder="请选择" />
+          <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" placeholder="请说明具体竞品" />
+        </van-cell-group>
+      </template>
+
+      <!-- 非待补充模式：只读 -->
+      <template v-else>
+        <van-cell-group title="谁报的">
+          <van-cell title="报备人" :value="clue.reporterName" />
+          <van-cell title="部门/单位" :value="clue.reporterDept || '-'" />
+          <van-cell title="联系方式" :value="clue.reporterContact || '-'" />
+        </van-cell-group>
+        <van-cell-group title="什么线索">
+          <van-cell title="线索名称" :value="clue.clueName" />
+          <van-cell title="线索类型" :value="clue.clueType" />
+          <van-cell title="线索描述" :label="clue.clueDesc" />
+        </van-cell-group>
+        <van-cell-group title="线索来源">
+          <van-cell title="信息来源" :value="clue.infoSource || '-'" />
+          <van-cell title="可靠度" :value="clue.reliability || '-'" />
+          <van-cell title="预计市场规模" :value="clue.marketSize || '-'" />
+        </van-cell-group>
+        <van-cell-group title="线索判断">
+          <van-cell title="涉及品类" :value="clue.productLines || '-'" />
+          <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
+          <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
+          <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
+        </van-cell-group>
+      </template>
 
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
@@ -55,37 +103,78 @@
           <div v-if="record.comment" class="review-comment">{{ record.comment }}</div>
         </div>
       </van-cell-group>
-
-      <!-- 退回补充后重新编辑 -->
-      <div v-if="clue.status === 'returned'" class="resubmit-bar safe-bottom">
-        <van-button type="primary" block @click="onResubmit">重新编辑提交</van-button>
-      </div>
     </div>
+
+    <!-- 待补充底部按钮 -->
+    <div v-if="clue && clue.status === 'pending_supplement'" class="supplement-bar safe-bottom">
+      <van-button @click="saveCurrentDraft" plain>暂存</van-button>
+      <van-button type="primary" @click="onResubmit" :loading="submitting">提交线索</van-button>
+    </div>
+
+    <!-- 线索类型选择 -->
+    <van-action-sheet v-model:show="showClueTypePicker" :actions="clueTypeActions"
+      @select="onSelectClueType" cancel-text="取消" />
+    <van-action-sheet v-model:show="showReliabilityPicker" :actions="reliabilityActions"
+      @select="onSelectReliability" cancel-text="取消" />
+    <van-action-sheet v-model:show="showUrgencyPicker" :actions="urgencyActions"
+      @select="onSelectUrgency" cancel-text="取消" />
+    <van-action-sheet v-model:show="showProductStatusPicker" :actions="productStatusActions"
+      @select="onSelectProductStatus" cancel-text="取消" />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl } from '../api'
+import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue } from '../api'
+import { showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const route = useRoute()
 const clue = ref(null)
 const reviewHistory = ref([])
 const attachments = ref([])
+const submitting = ref(false)
+
+const form = reactive({
+  reporterName: '', reporterDept: '', reporterContact: '',
+  clueName: '', clueType: '', clueTypeOther: '', clueDesc: '',
+  infoSourceArr: [], infoSourceOther: '', reliability: '', marketSize: '',
+  productLinesArr: [], productLinesDetail: '', targetCustomersArr: [], targetCustomersOther: '',
+  urgency: '', productStatus: '', productStatusDetail: ''
+})
+
+const clueTypeOptions = ['新产品/新功能', '现有产品改进/新应用场景', '新应用场景/新行业拓展', '产品新动向/产品威胁', '政策/标准/法规变化', '客户/市场/技术突破', '其他']
+const infoSourceOptions = ['客户/业务直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '装修公司/施工方反馈', '行业同事反馈', '行业展会/论坛/交流', '产品观察/产品情报', '行业媒体/行业报告', '政策/标准/法规文件', '其他']
+const reliabilityOptions = ['高（多个独立来源可交叉验证）', '中（单一可靠来源，如老客户直接反馈）', '低（道听途说/网络偶然获取）']
+const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃气管道', '新风管道', '净水/水处理', '全品类']
+const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
+const urgencyOptions = ['紧迫（窗口期很短，3个月内需要响应）', '较急（建议尽快关注和行动）', '从容（可从容调研，1年以上窗口期）', '不确定']
+const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
+
+const showClueTypePicker = ref(false)
+const showReliabilityPicker = ref(false)
+const showUrgencyPicker = ref(false)
+const showProductStatusPicker = ref(false)
+
+const clueTypeActions = clueTypeOptions.map(v => ({ name: v }))
+const reliabilityActions = reliabilityOptions.map(v => ({ name: v }))
+const urgencyActions = urgencyOptions.map(v => ({ name: v }))
+const productStatusActions = productStatusOptions.map(v => ({ name: v }))
+
+const onSelectClueType = ({ name }) => { form.clueType = name; showClueTypePicker.value = false }
+const onSelectReliability = ({ name }) => { form.reliability = name; showReliabilityPicker.value = false }
+const onSelectUrgency = ({ name }) => { form.urgency = name; showUrgencyPicker.value = false }
+const onSelectProductStatus = ({ name }) => { form.productStatus = name; showProductStatusPicker.value = false }
 
 const statusMap = {
-  new: '新建',
+  new: '新建', pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
   ipd_review: 'IPD立项',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',
   verifying_rejected: '验证不通过'
 }
-const stageLabels = {
-  initial_screening: '初筛', judging: '研判', verifying: '验证',
-  ipd_review: 'IPD立项'
-}
+const stageLabels = { initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项' }
 const actionLabels = { pass: '通过', reject: '不通过', return: '退回补充' }
 
 function statusLabel(s) {
@@ -96,29 +185,116 @@ function stageLabel(s) { return stageLabels[s] || s }
 function actionLabel(a) { return actionLabels[a] || a }
 function formatDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '' }
 
+let toastTimer = null
+function showMyToast(msg) {
+  const old = document.querySelector('.my-toast')
+  if (old) { clearTimeout(toastTimer); old.remove() }
+  const el = document.createElement('div')
+  el.className = 'my-toast'
+  el.textContent = msg
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#fff;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;white-space:nowrap;'
+  document.body.appendChild(el)
+  toastTimer = setTimeout(() => { const e = document.querySelector('.my-toast'); if (e) e.remove() }, 1500)
+}
+
+function loadClueIntoForm(clueData) {
+  form.reporterName = clueData.reporterName || ''
+  form.reporterDept = clueData.reporterDept || ''
+  form.reporterContact = clueData.reporterContact || ''
+  form.clueName = clueData.clueName || ''
+  form.clueType = clueData.clueType || ''
+  form.clueTypeOther = clueData.clueTypeOther || ''
+  form.clueDesc = clueData.clueDesc || ''
+  if (clueData.infoSource) form.infoSourceArr = clueData.infoSource.split(',')
+  form.infoSourceOther = clueData.infoSourceOther || ''
+  form.reliability = clueData.reliability || ''
+  form.marketSize = clueData.marketSize || ''
+  if (clueData.productLines) form.productLinesArr = clueData.productLines.split(',')
+  form.productLinesDetail = clueData.productLinesDetail || ''
+  if (clueData.targetCustomers) form.targetCustomersArr = clueData.targetCustomers.split(',')
+  form.targetCustomersOther = clueData.targetCustomersOther || ''
+  form.urgency = clueData.urgency || ''
+  form.productStatus = clueData.productStatus || ''
+  form.productStatusDetail = clueData.productStatusDetail || ''
+}
+
 onMounted(async () => {
   const id = route.params.id
   try {
     const [clueRes, historyRes, attRes] = await Promise.all([
-      getClueDetail(id),
-      getReviewHistory(id),
-      getClueAttachments(id)
+      getClueDetail(id), getReviewHistory(id), getClueAttachments(id)
     ])
-    if (clueRes.data.code === 0) clue.value = clueRes.data.data
+    if (clueRes.data.code === 0) {
+      clue.value = clueRes.data.data
+      if (clue.value.status === 'pending_supplement') {
+        loadClueIntoForm(clue.value)
+      }
+    }
     if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
-  } catch (e) {
-    console.error('加载失败', e)
-  }
+  } catch (e) { console.error('加载失败', e) }
 })
 
-function onResubmit() {
-  router.push({ path: '/submit', query: { resubmit: clue.value?.id } })
+function buildPayload() {
+  return {
+    reporterName: form.reporterName,
+    reporterDept: form.reporterDept,
+    reporterContact: form.reporterContact,
+    wecomUserId: clue.value.wecomUserId || 'user_001',
+    clueName: form.clueName,
+    clueType: form.clueType,
+    clueTypeOther: form.clueTypeOther,
+    clueDesc: form.clueDesc,
+    infoSource: form.infoSourceArr.join(','),
+    infoSourceOther: form.infoSourceOther,
+    reliability: form.reliability,
+    marketSize: form.marketSize,
+    productLines: form.productLinesArr.join(','),
+    productLinesDetail: form.productLinesDetail,
+    targetCustomers: form.targetCustomersArr.join(','),
+    targetCustomersOther: form.targetCustomersOther,
+    urgency: form.urgency,
+    productStatus: form.productStatus,
+    productStatusDetail: form.productStatusDetail,
+    draftId: clue.value.id,
+    action: 'save'
+  }
 }
 
-function downloadFile(attachmentId) {
-  window.open(getFileUrl(attachmentId), '_blank')
+async function saveCurrentDraft() {
+  try {
+    const payload = buildPayload()
+    const { data } = await saveClue(payload)
+    if (data.code === 0) {
+      showMyToast('暂存成功')
+    } else {
+      showMyToast(data.message || '暂存失败')
+    }
+  } catch (e) {
+    showMyToast('暂存失败，请重试')
+  }
 }
+
+async function onResubmit() {
+  submitting.value = true
+  try {
+    const payload = buildPayload()
+    payload.action = 'submit'
+    const { data } = await submitClue(payload)
+    if (data.code === 0) {
+      showMyToast('提交成功')
+      router.push('/')
+    } else {
+      showMyToast(data.message || '提交失败')
+    }
+  } catch (e) {
+    showMyToast('提交失败，请重试')
+  } finally {
+    submitting.value = false
+  }
+}
+
+function downloadFile(attachmentId) { window.open(getFileUrl(attachmentId), '_blank') }
 
 function formatSize(bytes) {
   if (!bytes) return '0 B'
@@ -147,6 +323,48 @@ function formatSize(bytes) {
   margin-bottom: 8px;
 }
 .clue-no { font-size: 12px; color: #999; }
+
+.field-label {
+  padding: 12px 16px 8px;
+  font-size: 14px;
+  color: #323233;
+  font-weight: 500;
+}
+.desc-textarea-wrapper {
+  margin: 0 16px;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.desc-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #323233;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+}
+.desc-textarea::placeholder { color: #c8c9cc; }
+.desc-count {
+  text-align: right;
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  color: #999;
+  background: #fff;
+}
+.cb-group {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cb-group :deep(.van-checkbox) { margin: 0; }
+
 .review-record {
   padding: 12px 16px;
   border-bottom: 1px solid #ebedf0;
@@ -163,5 +381,17 @@ function formatSize(bytes) {
 .review-action.return { color: #faad14; }
 .review-time { font-size: 12px; color: #999; margin-left: auto; }
 .review-comment { margin-top: 8px; font-size: 13px; color: #666; background: #f7f8fa; padding: 8px; border-radius: 4px; }
-.resubmit-bar { padding: 16px; background: #fff; border-top: 1px solid #ebedf0; position: fixed; bottom: 0; left: 0; right: 0; }
+
+.supplement-bar {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #ebedf0;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  max-width: 750px;
+  margin: 0 auto;
+}
+.supplement-bar .van-button { flex: 1; }
 </style>

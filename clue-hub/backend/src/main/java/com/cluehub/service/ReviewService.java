@@ -49,9 +49,9 @@ public class ReviewService {
         String currentStatus = clue.getStatus();
 
         if ("return".equals(action)) {
-            // 退回补充 → 回到新建状态（仅初筛阶段可用）
+            // 退回补充 → 待补充（仅初筛阶段可用）
             if ("initial_screening".equals(currentStatus)) {
-                clue.setStatus("new");
+                clue.setStatus("pending_supplement");
             } else {
                 throw new RuntimeException("仅初筛阶段可以退回补充");
             }
