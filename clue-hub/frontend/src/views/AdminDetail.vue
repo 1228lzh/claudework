@@ -81,7 +81,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl } from '../api'
-import { showToast, showSuccessToast, showFailToast } from 'vant'
+
+let toastTimer = null
+function showMyToast(msg) {
+  const old = document.querySelector('.my-toast')
+  if (old) { clearTimeout(toastTimer); old.remove() }
+  const el = document.createElement('div')
+  el.className = 'my-toast'
+  el.textContent = msg
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#fff;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;white-space:nowrap;'
+  document.body.appendChild(el)
+  toastTimer = setTimeout(() => { const e = document.querySelector('.my-toast'); if (e) e.remove() }, 1500)
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -136,13 +147,13 @@ async function doReview(action) {
           await uploadReviewFile(data.data.id, f.file)
         }
       }
-      showSuccessToast(actionLabels[action] + '操作完成')
+      showMyToast('操作成功')
       setTimeout(() => router.back(), 800)
     } else {
-      showFailToast(data.message || '操作失败')
+      showMyToast(data.message || '操作失败')
     }
   } catch (e) {
-    showFailToast('操作失败')
+    showMyToast('操作失败')
   }
 }
 

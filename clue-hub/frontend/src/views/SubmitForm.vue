@@ -133,7 +133,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { submitClue, saveClue, getPending, getClueDetail, uploadClueFile } from '../api'
-import { showToast, showSuccessToast, showFailToast, showConfirmDialog } from 'vant'
+import { showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const route = useRoute()
@@ -228,7 +228,7 @@ onMounted(async () => {
       const { data: clueData } = await getClueDetail(editId)
       if (clueData.code === 0 && clueData.data) {
         loadClueIntoForm(clueData.data)
-        showToast('正在编辑线索')
+        showMyToast('正在编辑线索')
       }
     } catch (e) { /* ignore */ }
     loadWecomUserInfo()
@@ -240,7 +240,7 @@ onMounted(async () => {
     const { data } = await getPending(form.wecomUserId)
     if (data.code === 0 && data.data) {
       loadClueIntoForm(data.data)
-      showToast('已恢复暂存的线索')
+      showMyToast('已恢复暂存的线索')
     }
   } catch (e) { /* ignore */ }
 
@@ -283,17 +283,17 @@ function loadWecomUserInfo() {
 function validateStep(step) {
   switch (step) {
     case 0:
-      if (!form.reporterName) { showToast('请填写报备人'); return false }
+      if (!form.reporterName) { showMyToast('请填写报备人'); return false }
       break
     case 1:
-      if (!form.clueName) { showToast('请填写线索名称'); return false }
-      if (!form.clueType) { showToast('请选择线索类型'); return false }
-      if (!form.clueDesc) { showToast('请填写线索描述'); return false }
+      if (!form.clueName) { showMyToast('请填写线索名称'); return false }
+      if (!form.clueType) { showMyToast('请选择线索类型'); return false }
+      if (!form.clueDesc) { showMyToast('请填写线索描述'); return false }
       break
     case 2:
-      if (!form.infoSourceArr.length) { showToast('请选择信息来源'); return false }
-      if (!form.reliability) { showToast('请选择信息可靠度'); return false }
-      if (!form.marketSize) { showToast('请填写预计市场规模'); return false }
+      if (!form.infoSourceArr.length) { showMyToast('请选择信息来源'); return false }
+      if (!form.reliability) { showMyToast('请选择信息可靠度'); return false }
+      if (!form.marketSize) { showMyToast('请填写预计市场规模'); return false }
       break
     case 3:
       // 非必填
@@ -315,6 +315,18 @@ function prevStep() {
 }
 
 // 手动暂存
+let toastTimer = null
+function showMyToast(msg) {
+  const old = document.querySelector('.my-toast')
+  if (old) { clearTimeout(toastTimer); old.remove() }
+  const el = document.createElement('div')
+  el.className = 'my-toast'
+  el.textContent = msg
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.7);color:#fff;padding:12px 24px;border-radius:8px;z-index:9999;font-size:14px;white-space:nowrap;'
+  document.body.appendChild(el)
+  toastTimer = setTimeout(() => { const e = document.querySelector('.my-toast'); if (e) e.remove() }, 1500)
+}
+
 async function saveCurrentDraft() {
   const payload = buildPayload()
   payload.draftId = form.draftId
@@ -323,13 +335,12 @@ async function saveCurrentDraft() {
     const { data } = await saveClue(payload)
     if (data.code === 0) {
       form.draftId = data.data.id
-      showToast({ message: '暂存成功', icon: 'success', duration: 1500 })
+      showMyToast('暂存成功')
     } else {
-      showToast({ message: data.message || '暂存失败', icon: 'fail' })
+      showMyToast(data.message || '暂存失败')
     }
   } catch (e) {
-    console.error('暂存失败:', e)
-    showToast({ message: '暂存失败，请重试', icon: 'fail' })
+    showMyToast('暂存失败，请重试')
   }
 }
 
@@ -395,13 +406,13 @@ async function onSubmit() {
       if (pendingFiles.value.length > 0) {
         await uploadFiles(data.data.id)
       }
-      showSuccessToast('提交成功！')
+      showMyToast('提交成功！')
       router.push('/')
     } else {
-      showFailToast(data.message || '提交失败')
+      showMyToast(data.message || '提交失败')
     }
   } catch (e) {
-    showFailToast('提交失败，请重试')
+    showMyToast('提交失败，请重试')
   } finally {
     submitting.value = false
   }
