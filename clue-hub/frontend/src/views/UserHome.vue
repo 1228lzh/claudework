@@ -150,9 +150,7 @@ onMounted(loadClues)
   background: #f5f7fa;
   padding-bottom: 110px;
 }
-.tab-content {
-  padding-top: 46px;
-}
+.tab-content {}
 .empty-state {
   padding-top: 120px;
 }

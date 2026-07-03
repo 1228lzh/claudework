@@ -123,9 +123,7 @@ onMounted(loadClues)
   background: #f5f7fa;
   padding-bottom: 110px;
 }
-.tab-content {
-  padding-top: 46px;
-}
+.tab-content {}
 .filter-bar {
   background: #fff;
   border-bottom: 1px solid #ebedf0;
