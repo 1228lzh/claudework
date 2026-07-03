@@ -2,7 +2,7 @@
   <div class="user-home">
     <!-- 线索提报 Tab -->
     <div v-show="activeTab === 'clues'" class="tab-content">
-      <van-nav-bar title="线索提报" fixed placeholder>
+      <van-nav-bar title="线索提报" fixed>
         <template #right>
           <van-icon name="add-o" size="22" @click="router.push('/submit?new=true')" />
         </template>
@@ -40,7 +40,7 @@
 
     <!-- 我的 Tab -->
     <div v-show="activeTab === 'mine'" class="tab-content">
-      <van-nav-bar title="我的" fixed placeholder />
+      <van-nav-bar title="我的" fixed />
 
       <div class="profile-card">
         <div class="avatar">
@@ -150,7 +150,7 @@ onMounted(loadClues)
   background: #f5f7fa;
   padding-bottom: 110px;
 }
-.tab-content {}
+.tab-content { padding-top: 46px; }
 .empty-state {
   padding-top: 120px;
 }
@@ -190,7 +190,8 @@ onMounted(loadClues)
   background: #fff;
   margin-bottom: 12px;
 }
-.profile-info .name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 4px; }
-.profile-info .dept { font-size: 14px; color: #666; margin-bottom: 2px; }
-.profile-info .contact { font-size: 13px; color: #999; }
+.profile-info { flex: 1; min-width: 0; }
+.profile-info .name { font-size: 18px; font-weight: 600; color: #333; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-info .dept { font-size: 14px; color: #666; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-info .contact { font-size: 13px; color: #999; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
