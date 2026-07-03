@@ -1,0 +1,78 @@
+/* 全局样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #f5f7fa;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* PC 端最大宽度限制 + 居中 */
+.app-container {
+  max-width: 750px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #fff;
+}
+
+/* PC 管理后台宽度放宽 */
+.app-container.admin {
+  max-width: 1200px;
+}
+
+/* 安全区域适配 */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 触控反馈 */
+.tap-active:active {
+  opacity: 0.7;
+}
+
+/* 文本省略 */
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 表单步骤区域 */
+.step-content {
+  padding: 16px;
+  min-height: 60vh;
+}
+
+.step-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px;
+  gap: 12px;
+  background: #fff;
+  border-top: 1px solid #ebedf0;
+}
+
+/* 审核阶段标签 */
+.stage-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.stage-tag.new { background: #f5f5f5; color: #999; }
+.stage-tag.initial_screening { background: #fff7e6; color: #fa8c16; }
+.stage-tag.judging { background: #e6f7ff; color: #1890ff; }
+.stage-tag.verifying { background: #f9f0ff; color: #722ed1; }
+.stage-tag.ipd_review { background: #fff7e6; color: #d46b08; }
+.stage-tag.approved { background: #f6ffed; color: #52c41a; }
+.stage-tag.initial_screening_rejected,
+.stage-tag.judging_rejected,
+.stage-tag.verifying_rejected,
+.stage-tag.ipd_review_rejected { background: #fff1f0; color: #f5222d; }
