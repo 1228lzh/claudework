@@ -38,6 +38,12 @@
         <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
       </van-cell-group>
 
+      <!-- 附件 -->
+      <van-cell-group v-if="attachments.length" title="附件">
+        <van-cell v-for="att in attachments" :key="att.id" :title="att.originalName"
+          :label="formatSize(att.fileSize)" is-link @click="downloadFile(att.id)" />
+      </van-cell-group>
+
       <!-- 审核历史 -->
       <van-cell-group v-if="reviewHistory.length" title="审核记录">
         <div v-for="record in reviewHistory" :key="record.id" class="review-record">
@@ -61,12 +67,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getClueDetail, getReviewHistory } from '../api'
+import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl } from '../api'
 
 const router = useRouter()
 const route = useRoute()
 const clue = ref(null)
 const reviewHistory = ref([])
+const attachments = ref([])
 
 const statusMap = {
   new: '新建',
@@ -92,12 +99,14 @@ function formatDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : ''
 onMounted(async () => {
   const id = route.params.id
   try {
-    const [clueRes, historyRes] = await Promise.all([
+    const [clueRes, historyRes, attRes] = await Promise.all([
       getClueDetail(id),
-      getReviewHistory(id)
+      getReviewHistory(id),
+      getClueAttachments(id)
     ])
     if (clueRes.data.code === 0) clue.value = clueRes.data.data
     if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
+    if (attRes.data.code === 0) attachments.value = attRes.data.data || []
   } catch (e) {
     console.error('加载失败', e)
   }
@@ -105,6 +114,18 @@ onMounted(async () => {
 
 function onResubmit() {
   router.push({ path: '/submit', query: { resubmit: clue.value?.id } })
+}
+
+function downloadFile(attachmentId) {
+  window.open(getFileUrl(attachmentId), '_blank')
+}
+
+function formatSize(bytes) {
+  if (!bytes) return '0 B'
+  const u = ['B', 'KB', 'MB', 'GB']
+  let i = 0, s = bytes
+  while (s >= 1024 && i < u.length - 1) { s /= 1024; i++ }
+  return s.toFixed(1) + ' ' + u[i]
 }
 </script>
 

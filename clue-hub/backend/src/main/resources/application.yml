@@ -25,7 +25,7 @@ spring:
 
 # 文件上传存储路径
 app:
-  upload-path: ./uploads
+  upload-path: E:/AI/claudeWork/clue-hub/backend/uploads
   # 企微配置（待替换为实际值）
   wecom:
     corp-id: your_corp_id
