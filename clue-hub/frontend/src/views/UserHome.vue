@@ -139,18 +139,19 @@ function clearCache() {
   showToast('缓存已清理')
 }
 
-function onDelete(clue) {
-  showConfirmDialog({
-    title: '确认删除',
-    message: `确定删除线索「${clue.clueNo}」吗？删除后不可恢复。`,
-  }).then(() => {
-    deleteClue(clue.id).then(() => {
-      showToast('已删除')
-      loadClues()
-    }).catch(() => {
-      showToast('删除失败')
+async function onDelete(clue) {
+  try {
+    await showConfirmDialog({
+      title: '确认删除',
+      message: `确定删除线索「${clue.clueNo}」吗？删除后不可恢复。`,
     })
-  }).catch(() => {})
+    clues.value = clues.value.filter(c => c.id !== clue.id)
+    await deleteClue(clue.id)
+    showToast('已删除')
+  } catch (e) {
+    loadClues()
+    if (e !== 'cancel') showToast('删除失败')
+  }
 }
 
 onMounted(loadClues)
