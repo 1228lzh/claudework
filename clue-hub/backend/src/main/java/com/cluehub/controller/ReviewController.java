@@ -4,6 +4,7 @@ import com.cluehub.dto.ApiResponse;
 import com.cluehub.dto.ReviewDTO;
 import com.cluehub.entity.Clue;
 import com.cluehub.entity.ReviewRecord;
+import com.cluehub.model.UserInfo;
 import com.cluehub.service.ClueService;
 import com.cluehub.service.FileService;
 import com.cluehub.service.ReviewService;
@@ -11,12 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 审核控制器
- */
 @RestController
 @RequestMapping("/api/review")
 @RequiredArgsConstructor
@@ -26,9 +25,6 @@ public class ReviewController {
     private final ClueService clueService;
     private final FileService fileService;
 
-    /**
-     * 管理端：获取所有已提交的线索列表
-     */
     @GetMapping("/clues")
     public ApiResponse<List<Clue>> listClues(@RequestParam(required = false) String status) {
         if (status != null && !status.isEmpty()) {
@@ -38,12 +34,13 @@ public class ReviewController {
         return ApiResponse.ok(clueService.getAllSubmitted());
     }
 
-    /**
-     * 审核操作
-     */
     @PostMapping("/{clueId}")
-    public ApiResponse<ReviewRecord> review(@PathVariable Long clueId, @RequestBody ReviewDTO dto) {
+    public ApiResponse<ReviewRecord> review(@PathVariable Long clueId,
+                                             @RequestBody ReviewDTO dto,
+                                             HttpServletRequest request) {
         try {
+            UserInfo user = (UserInfo) request.getAttribute("currentUser");
+            dto.setReviewerName(user != null ? user.getFullname() : "审核员");
             ReviewRecord record = reviewService.review(clueId, dto);
             return ApiResponse.ok(record);
         } catch (Exception e) {
@@ -51,17 +48,11 @@ public class ReviewController {
         }
     }
 
-    /**
-     * 获取审核历史
-     */
     @GetMapping("/{clueId}/history")
     public ApiResponse<List<ReviewRecord>> history(@PathVariable Long clueId) {
         return ApiResponse.ok(reviewService.getReviewHistory(clueId));
     }
 
-    /**
-     * 审核附件上传
-     */
     @PostMapping("/{reviewRecordId}/upload")
     public ApiResponse<?> uploadReviewAttachment(@PathVariable Long reviewRecordId,
                                                   @RequestParam("file") MultipartFile file) {
@@ -72,9 +63,6 @@ public class ReviewController {
         }
     }
 
-    /**
-     * 获取审核附件列表
-     */
     @GetMapping("/{reviewRecordId}/attachments")
     public ApiResponse<?> getReviewAttachments(@PathVariable Long reviewRecordId) {
         return ApiResponse.ok(fileService.getReviewAttachments(reviewRecordId));
