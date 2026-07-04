@@ -238,7 +238,7 @@ onMounted(async () => {
 
   // 默认：尝试恢复最近的暂存线索
   try {
-    const { data } = await getPending(form.wecomUserId)
+    const { data } = await getPending()
     if (data.code === 0 && data.data) {
       loadClueIntoForm(data.data)
       showMyToast('已恢复暂存的线索')
@@ -327,6 +327,7 @@ function showMyToast(msg) {
 }
 
 async function saveCurrentDraft() {
+  form.wecomUserId = userStore.userId
   const payload = buildPayload()
   payload.draftId = form.draftId
   payload.action = 'save'
@@ -346,6 +347,7 @@ async function saveCurrentDraft() {
 // 自动暂存（步切换时静默调用）
 async function autoSaveDraft() {
   try {
+    form.wecomUserId = userStore.userId
     const payload = buildPayload()
     payload.draftId = form.draftId
     payload.action = 'save'
