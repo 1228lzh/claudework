@@ -196,4 +196,20 @@ public class ClueService {
         clue.setSubmittedAt(LocalDateTime.now());
         return clueRepository.save(clue);
     }
+
+    /**
+     * 删除新建状态的线索（仅本人可删）
+     */
+    @Transactional
+    public void deleteIfNew(Long id, String userId) {
+        Clue clue = clueRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("线索不存在"));
+        if (!"new".equals(clue.getStatus())) {
+            throw new RuntimeException("只能删除新建状态的线索");
+        }
+        if (!userId.equals(clue.getWecomUserId())) {
+            throw new RuntimeException("无权删除此线索");
+        }
+        clueRepository.deleteById(id);
+    }
 }

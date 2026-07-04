@@ -102,4 +102,11 @@ public class ClueController {
     public ApiResponse<?> getAttachments(@PathVariable Long id) {
         return ApiResponse.ok(fileService.getClueAttachments(id));
     }
+
+    /** 删除新建状态的线索 */
+    @DeleteMapping("/{id}")
+    public ApiResponse<?> delete(@PathVariable Long id, HttpServletRequest request) {
+        clueService.deleteIfNew(id, getUserId(request));
+        return ApiResponse.ok("已删除");
+    }
 }
