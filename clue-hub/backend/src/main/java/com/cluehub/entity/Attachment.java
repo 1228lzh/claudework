@@ -47,10 +47,25 @@ public class Attachment {
     /** 上传时间 */
     private LocalDateTime uploadedAt;
 
+    // ===== 审计字段 =====
+    private LocalDateTime createdAt;
+    @Column(length = 64)
+    private String createdBy;
+    private LocalDateTime updatedAt;
+    @Column(length = 64)
+    private String updatedBy;
+
     @PrePersist
     protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
         if (uploadedAt == null) {
             uploadedAt = LocalDateTime.now();
         }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

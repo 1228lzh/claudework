@@ -42,7 +42,7 @@ public class ReviewService {
      * 处理审核操作
      */
     @Transactional
-    public ReviewRecord review(Long clueId, ReviewDTO dto) {
+    public ReviewRecord review(Long clueId, ReviewDTO dto, String userId) {
         Clue clue = clueRepository.findById(clueId)
                 .orElseThrow(() -> new RuntimeException("线索不存在"));
 
@@ -79,6 +79,8 @@ public class ReviewService {
                 .action(action)
                 .comment(dto.getComment())
                 .reviewerName(dto.getReviewerName())
+                .createdBy(userId)
+                .updatedBy(userId)
                 .build();
 
         return reviewRecordRepository.save(record);

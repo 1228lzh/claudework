@@ -127,8 +127,16 @@ public class Clue {
     /** IPD立项时间 */
     private LocalDateTime ipdApprovedAt;
 
+    // ===== 审计字段 =====
+    @Column(length = 64)
+    private String createdBy;
+    @Column(length = 64)
+    private String updatedBy;
+    private LocalDateTime createdAt;
+
     @PrePersist
     protected void onCreate() {
+        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (submittedAt == null && !"draft".equals(status)) {
             submittedAt = LocalDateTime.now();

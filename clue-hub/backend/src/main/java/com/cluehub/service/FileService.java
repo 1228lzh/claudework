@@ -26,7 +26,7 @@ public class FileService {
     /**
      * 上传附件（线索附件或审核附件）
      */
-    public Attachment upload(MultipartFile file, Long clueId, Long reviewRecordId, String attachType) throws IOException {
+    public Attachment upload(MultipartFile file, Long clueId, Long reviewRecordId, String attachType, String userId) throws IOException {
         Path uploadDir = Paths.get(uploadPath, attachType);
         Files.createDirectories(uploadDir);
 
@@ -48,6 +48,8 @@ public class FileService {
                 .storedName(storedName)
                 .filePath(targetPath.toString())
                 .fileSize(file.getSize())
+                .createdBy(userId)
+                .updatedBy(userId)
                 .build();
 
         return attachmentRepository.save(attachment);

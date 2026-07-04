@@ -47,11 +47,13 @@ public class ClueService {
             // 全新提交
             clue = new Clue();
             clue.setClueNo(generateClueNo());
+            clue.setCreatedBy(dto.getWecomUserId());
         }
 
         fillClueFields(clue, dto);
         clue.setStatus("initial_screening");
         clue.setSubmittedAt(LocalDateTime.now());
+        clue.setUpdatedBy(dto.getWecomUserId());
 
         return clueRepository.save(clue);
     }
@@ -87,10 +89,12 @@ public class ClueService {
             // 全新暂存 → 新建一条
             clue = new Clue();
             clue.setClueNo(generateClueNo());
+            clue.setCreatedBy(dto.getWecomUserId());
         }
 
         fillClueFields(clue, dto);
         clue.setStatus("new");
+        clue.setUpdatedBy(dto.getWecomUserId());
         return clueRepository.save(clue);
     }
 
@@ -153,6 +157,7 @@ public class ClueService {
         clue.setReporterContact(dto.getReporterContact());
         clue.setStatus("initial_screening");
         clue.setSubmittedAt(LocalDateTime.now());
+        clue.setUpdatedBy(dto.getWecomUserId());
         return clueRepository.save(clue);
     }
 

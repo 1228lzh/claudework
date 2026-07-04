@@ -41,7 +41,8 @@ public class ReviewController {
         try {
             UserInfo user = (UserInfo) request.getAttribute("currentUser");
             dto.setReviewerName(user != null ? user.getFullname() : "审核员");
-            ReviewRecord record = reviewService.review(clueId, dto);
+            String userId = user != null ? user.getUserId() : null;
+            ReviewRecord record = reviewService.review(clueId, dto, userId);
             return ApiResponse.ok(record);
         } catch (Exception e) {
             return ApiResponse.fail(e.getMessage());
@@ -55,9 +56,12 @@ public class ReviewController {
 
     @PostMapping("/{reviewRecordId}/upload")
     public ApiResponse<?> uploadReviewAttachment(@PathVariable Long reviewRecordId,
-                                                  @RequestParam("file") MultipartFile file) {
+                                                  @RequestParam("file") MultipartFile file,
+                                                  HttpServletRequest request) {
         try {
-            return ApiResponse.ok(fileService.upload(file, null, reviewRecordId, "review"));
+            UserInfo user = (UserInfo) request.getAttribute("currentUser");
+            String userId = user != null ? user.getUserId() : null;
+            return ApiResponse.ok(fileService.upload(file, null, reviewRecordId, "review", userId));
         } catch (Exception e) {
             return ApiResponse.fail("上传失败：" + e.getMessage());
         }

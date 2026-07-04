@@ -80,9 +80,10 @@ public class ClueController {
     /** 上传附件 */
     @PostMapping("/{id}/upload")
     public ApiResponse<?> uploadAttachment(@PathVariable Long id,
-                                           @RequestParam("file") MultipartFile file) {
+                                           @RequestParam("file") MultipartFile file,
+                                           HttpServletRequest request) {
         try {
-            return ApiResponse.ok(fileService.upload(file, id, null, "clue"));
+            return ApiResponse.ok(fileService.upload(file, id, null, "clue", getUserId(request)));
         } catch (Exception e) {
             return ApiResponse.fail("上传失败：" + e.getMessage());
         }
