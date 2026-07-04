@@ -3,7 +3,6 @@ package com.cluehub.controller;
 import com.cluehub.dto.ApiResponse;
 import com.cluehub.dto.ClueSubmitDTO;
 import com.cluehub.entity.Clue;
-import com.cluehub.entity.ClueDraft;
 import com.cluehub.model.UserInfo;
 import com.cluehub.service.ClueService;
 import com.cluehub.service.FileService;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/clue")
@@ -45,13 +43,6 @@ public class ClueController {
         dto.setWecomUserId(getUserId(request));
         Clue clue = clueService.saveNew(dto);
         return ApiResponse.ok("暂存成功", clue);
-    }
-
-    /** 获取草稿 */
-    @GetMapping("/draft")
-    public ApiResponse<ClueDraft> getDraft(HttpServletRequest request) {
-        Optional<ClueDraft> draft = clueService.getDraft(getUserId(request));
-        return draft.map(ApiResponse::ok).orElse(ApiResponse.ok(null));
     }
 
     /** 获取用户暂存的线索 */

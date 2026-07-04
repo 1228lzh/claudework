@@ -2,11 +2,7 @@ package com.cluehub.service;
 
 import com.cluehub.dto.ClueSubmitDTO;
 import com.cluehub.entity.Clue;
-import com.cluehub.entity.ClueDraft;
 import com.cluehub.repository.ClueRepository;
-import com.cluehub.repository.ClueDraftRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,8 +17,6 @@ import java.util.Optional;
 public class ClueService {
 
     private final ClueRepository clueRepository;
-    private final ClueDraftRepository draftRepository;
-    private final ObjectMapper objectMapper;
 
     private static final DateTimeFormatter NO_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -60,41 +54,6 @@ public class ClueService {
         clue.setSubmittedAt(LocalDateTime.now());
 
         return clueRepository.save(clue);
-    }
-
-    /**
-     * 保存草稿（存草稿表，不影响线索表）
-     */
-    @Transactional
-    public ClueDraft saveDraft(ClueSubmitDTO dto) throws JsonProcessingException {
-        String draftJson = objectMapper.writeValueAsString(dto);
-        ClueDraft draft;
-        if (dto.getDraftId() != null) {
-            draft = draftRepository.findById(dto.getDraftId()).orElse(new ClueDraft());
-        } else if (dto.getWecomUserId() != null) {
-            draft = draftRepository.findByWecomUserId(dto.getWecomUserId()).orElse(new ClueDraft());
-        } else {
-            draft = new ClueDraft();
-        }
-        draft.setWecomUserId(dto.getWecomUserId());
-        draft.setDraftData(draftJson);
-        draft.setCurrentStep(dto.getAction() != null ? extractStep(dto) : 1);
-        return draftRepository.save(draft);
-    }
-
-    private int extractStep(ClueSubmitDTO dto) {
-        if (dto.getAction() != null && dto.getAction().startsWith("draft_step_")) {
-            try {
-                return Integer.parseInt(dto.getAction().substring("draft_step_".length()));
-            } catch (NumberFormatException e) {
-                return 1;
-            }
-        }
-        return 1;
-    }
-
-    public Optional<ClueDraft> getDraft(String wecomUserId) {
-        return draftRepository.findByWecomUserId(wecomUserId);
     }
 
     public Optional<Clue> getById(Long id) {
