@@ -107,6 +107,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl } from '../api'
+import { userStore } from '../stores/user.js'
 
 let toastTimer = null
 function showMyToast(msg) {
@@ -200,7 +201,7 @@ async function doReview(action) {
     const { data } = await submitReview(clue.value.id, {
       action,
       comment: reviewComment.value,
-      reviewerName: '审核员'
+      reviewerName: userStore.fullname || '审核员'
     })
     if (data.code === 0) {
       // 上传审核附件
