@@ -2,6 +2,7 @@ package com.cluehub.controller;
 
 import com.cluehub.config.FeilianProperties;
 import com.cluehub.model.UserInfo;
+import com.cluehub.service.SessionRegistry;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +32,7 @@ import java.util.UUID;
 public class AuthController {
 
     private final FeilianProperties feilian;
+    private final SessionRegistry sessionRegistry;
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String SESSION_USER_KEY = "currentUser";
     private static final String SESSION_STATE_KEY = "oauth2State";
@@ -87,6 +90,7 @@ public class AuthController {
             user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
             user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
             session.setAttribute(SESSION_USER_KEY, user);
+            sessionRegistry.register(accessToken, session);
             response.sendRedirect("/");
         } catch (Exception e) {
             log.error("Feilian OAuth2 callback failed", e);
@@ -108,10 +112,18 @@ public class AuthController {
 
     @GetMapping("/logout")
     public void logout(HttpSession session, HttpServletResponse response) throws IOException {
+        sessionRegistry.remove(session);
         session.invalidate();
         String url = feilian.getBaseUri() + "/oauth2/logout"
                 + "?post_logout_redirect_uri=" + feilian.getPostLogoutRedirectUri();
         response.sendRedirect(url);
+    }
+
+    @PostMapping("/backchannel_logout")
+    public ResponseEntity<?> backchannelLogout(@RequestParam("logout_token") String logoutToken) {
+        log.info("Backchannel logout received");
+        sessionRegistry.removeByToken(logoutToken);
+        return ResponseEntity.ok("{}");
     }
 
     @GetMapping("/user")
