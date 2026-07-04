@@ -52,7 +52,6 @@
         </div>
         <div class="profile-info">
           <div class="name">{{ userStore.fullname || '未设置' }}</div>
-          <div class="dept">{{ '' || '未知部门' }}</div>
           <div class="contact">{{ userStore.mobile || '未知联系方式' }}</div>
         </div>
       </div>
