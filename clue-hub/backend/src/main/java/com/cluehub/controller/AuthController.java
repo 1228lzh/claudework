@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -81,8 +85,21 @@ public class AuthController {
             session.setAttribute(SESSION_USER_KEY, user);
             response.sendRedirect("/");
         } catch (Exception e) {
-            response.sendRedirect("/auth/error");
+            log.error("Feilian OAuth2 callback failed", e);
+            response.sendRedirect("/auth/error?reason=" + java.net.URLEncoder.encode(e.getMessage(), "UTF-8"));
         }
+    }
+
+    @GetMapping("/error")
+    public void error(@RequestParam(defaultValue = "unknown") String reason, HttpServletResponse response) throws IOException {
+        response.setContentType("text/html;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        out.println("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>登录失败</title>");
+        out.println("<style>body{font-family:sans-serif;padding:40px;text-align:center}</style></head><body>");
+        out.println("<h2>登录失败</h2>");
+        out.println("<p>原因: " + reason + "</p>");
+        out.println("<p><a href='/auth/login'>重新登录</a></p>");
+        out.println("</body></html>");
     }
 
     @GetMapping("/logout")
