@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -60,7 +61,11 @@ public class ReviewService {
             clue.setStatus(currentStatus + "_rejected");
         } else if ("pass".equals(action)) {
             // 通过 → 进入下一阶段
-            clue.setStatus(getNextStage(currentStatus));
+            String nextStage = getNextStage(currentStatus);
+            clue.setStatus(nextStage);
+            if ("ipd_review".equals(nextStage)) {
+                clue.setIpdApprovedAt(LocalDateTime.now());
+            }
         } else {
             throw new RuntimeException("未知操作：" + action);
         }

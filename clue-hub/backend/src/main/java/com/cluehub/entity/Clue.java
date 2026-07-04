@@ -124,6 +124,9 @@ public class Clue {
     /** 更新时间 */
     private LocalDateTime updatedAt;
 
+    /** IPD立项时间 */
+    private LocalDateTime ipdApprovedAt;
+
     @PrePersist
     protected void onCreate() {
         updatedAt = LocalDateTime.now();

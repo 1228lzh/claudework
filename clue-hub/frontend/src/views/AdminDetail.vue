@@ -25,6 +25,7 @@
         <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
         <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
         <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
+        <van-cell v-if="clue.ipdApprovedAt" title="IPD立项时间" :value="formatDate(clue.ipdApprovedAt)" />
       </van-cell-group>
 
       <!-- 附件 -->
@@ -169,6 +170,10 @@ function downloadFile(attachmentId) {
 
 <style scoped>
 .admin-detail { padding-bottom: 200px; background: #f5f7fa; min-height: 100vh; }
+
+@media (min-width: 768px) {
+  .admin-detail { padding-bottom: 0; }
+}
 .detail-content { padding-top: 8px; }
 .review-record {
   padding: 12px 16px;
@@ -190,8 +195,15 @@ function downloadFile(attachmentId) {
   border-top: 1px solid #ebedf0;
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  max-width: 750px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .review-actions {
+    position: static;
+    max-width: none;
+  }
 }
 .review-upload { padding: 8px 0; }
 .action-buttons {
@@ -206,7 +218,14 @@ function downloadFile(attachmentId) {
   border-top: 1px solid #ebedf0;
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  max-width: 750px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .final-status {
+    position: static;
+    max-width: none;
+  }
 }
 </style>

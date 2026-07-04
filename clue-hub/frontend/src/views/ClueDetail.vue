@@ -83,6 +83,7 @@
           <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
           <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
           <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
+          <van-cell v-if="clue.ipdApprovedAt" title="IPD立项时间" :value="formatDate(clue.ipdApprovedAt)" />
         </van-cell-group>
       </template>
 
