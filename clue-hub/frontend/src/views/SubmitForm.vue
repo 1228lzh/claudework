@@ -16,10 +16,10 @@
     <div class="step-content">
       <!-- 第一步：谁报的 -->
       <template v-if="currentStep === 0">
-        <van-field v-model="form.reporterName" label="报备人" placeholder="请输入姓名" required :rules="[{ required: true }]" />
-        <van-field v-model="form.reporterDept" label="部门/单位" placeholder="请输入部门/单位" />
+        <van-field v-model="form.wecomUserId" label="报备人工号" readonly />
+        <van-field v-model="form.reporterName" label="报备人姓名" readonly />
+        <van-field v-model="form.reporterDept" label="部门" placeholder="请输入部门" />
         <van-field v-model="form.reporterContact" label="联系方式" placeholder="请输入联系方式" />
-        <div class="hint-text">💡 企微用户信息将自动带出，可手动修改</div>
       </template>
 
       <!-- 第二步：什么线索 -->
@@ -272,6 +272,7 @@ function loadClueIntoForm(clue) {
 
 function loadWecomUserInfo() {
   if (!form.reporterName) {
+    form.wecomUserId = userStore.userId || ''
     form.reporterName = userStore.fullname || ''
     form.reporterContact = userStore.mobile || ''
   }
