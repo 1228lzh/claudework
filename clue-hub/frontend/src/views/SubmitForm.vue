@@ -250,6 +250,7 @@ onMounted(async () => {
 
 function loadClueIntoForm(clue) {
   form.draftId = clue.id
+  form.wecomUserId = clue.wecomUserId || ''
   form.reporterName = clue.reporterName || ''
   form.reporterDept = clue.reporterDept || ''
   form.reporterContact = clue.reporterContact || ''
@@ -271,8 +272,10 @@ function loadClueIntoForm(clue) {
 }
 
 function loadWecomUserInfo() {
-  if (!form.reporterName) {
+  if (!form.wecomUserId) {
     form.wecomUserId = userStore.userId || ''
+  }
+  if (!form.reporterName) {
     form.reporterName = userStore.fullname || ''
     form.reporterContact = userStore.mobile || ''
   }
