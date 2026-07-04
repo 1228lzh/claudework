@@ -271,12 +271,9 @@ function loadClueIntoForm(clue) {
 }
 
 function loadWecomUserInfo() {
-  // TODO: 实际对接企微OAuth获取用户信息
-  // 此处使用模拟数据
   if (!form.reporterName) {
-    form.reporterName = '王建国'
-    form.reporterDept = '市场部'
-    form.reporterContact = '138xxxx8888'
+    form.reporterName = userStore.fullname || ''
+    form.reporterContact = userStore.mobile || ''
   }
 }
 

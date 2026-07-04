@@ -41,8 +41,7 @@
           <van-icon name="user-circle-o" size="60" color="#1989fa" />
         </div>
         <div class="profile-info">
-          <div class="name">审核员</div>
-          <div class="dept">市场部</div>
+          <div class="name">{{ userStore.fullname || '审核员' }}</div>
         </div>
       </div>
 
@@ -65,6 +64,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getReviewClues } from '../api'
+import { userStore } from '../stores/user.js'
 
 const router = useRouter()
 const activeTab = ref('clues')
