@@ -31,3 +31,11 @@ app:
     corp-id: your_corp_id
     agent-id: your_agent_id
     secret: your_secret
+
+# 飞连 SSO Oauth2 配置
+feilian:
+  base-uri: https://auth.rifeng.com:10443/api
+  client-id: ${FEILIAN_CLIENT_ID:}
+  client-secret: ${FEILIAN_CLIENT_SECRET:}
+  redirect-uri: ${FEILIAN_REDIRECT_URI:http://localhost:3000/auth/callback}
+  post-logout-redirect-uri: ${FEILIAN_POST_LOGOUT_REDIRECT_URI:http://localhost:3000/}
