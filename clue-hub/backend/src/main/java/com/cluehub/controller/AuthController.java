@@ -90,6 +90,7 @@ public class AuthController {
             user.setFullname(userJson.has("fullname") ? userJson.get("fullname").asText() : "");
             user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
             user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
+            user.setAdmin(isAdminUser(user.getUserId()));
             session.setAttribute(SESSION_USER_KEY, user);
             sessionRegistry.register(accessToken, session);
             response.sendRedirect("/");
@@ -134,5 +135,14 @@ public class AuthController {
             return ResponseEntity.status(401).body("{\"code\":401,\"message\":\"未登录\"}");
         }
         return ResponseEntity.ok(user);
+    }
+
+    private boolean isAdminUser(String userId) {
+        String adminIds = feilian.getAdminIds();
+        if (adminIds == null || adminIds.isEmpty()) return false;
+        for (String id : adminIds.split(",")) {
+            if (id.trim().equals(userId)) return true;
+        }
+        return false;
     }
 }

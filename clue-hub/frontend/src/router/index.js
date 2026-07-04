@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { userStore } from '../stores/user.js'
 
 const routes = [
   {
@@ -36,6 +37,12 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to) => {
+  if (to.path.startsWith('/admin') && !userStore.admin) {
+    return '/'
+  }
 })
 
 router.afterEach((to) => {

@@ -13,4 +13,6 @@ public class FeilianProperties {
     private String clientSecret;
     private String redirectUri;
     private String postLogoutRedirectUri;
+    /** 管理员 user_id，多个逗号分隔 */
+    private String adminIds;
 }

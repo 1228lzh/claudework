@@ -39,3 +39,4 @@ feilian:
   client-secret: ${FEILIAN_CLIENT_SECRET:}
   redirect-uri: ${FEILIAN_REDIRECT_URI:http://10.1.32.30:5173/auth/callback}
   post-logout-redirect-uri: ${FEILIAN_POST_LOGOUT_REDIRECT_URI:http://10.1.32.30:5173/}
+  admin-ids: ${FEILIAN_ADMIN_IDS:50002062}

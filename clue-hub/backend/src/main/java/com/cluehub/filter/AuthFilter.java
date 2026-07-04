@@ -33,6 +33,12 @@ public class AuthFilter implements Filter {
             UserInfo user = (UserInfo) session.getAttribute(SESSION_USER_KEY);
             if (user != null) {
                 request.setAttribute("currentUser", user);
+                if (path.startsWith("/api/review") && !user.isAdmin()) {
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.setStatus(403);
+                    response.getWriter().write("{\"code\":403,\"message\":\"无管理员权限\"}");
+                    return;
+                }
                 chain.doFilter(req, res);
                 return;
             }

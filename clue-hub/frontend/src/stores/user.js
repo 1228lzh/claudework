@@ -5,6 +5,7 @@ export const userStore = reactive({
   fullname: '',
   mobile: '',
   email: '',
+  admin: false,
   loaded: false,
 
   get isLoggedIn() {
@@ -16,6 +17,7 @@ export const userStore = reactive({
     this.fullname = user.fullname || ''
     this.mobile = user.mobile || ''
     this.email = user.email || ''
+    this.admin = user.admin || false
     this.loaded = true
   },
 
@@ -24,6 +26,7 @@ export const userStore = reactive({
     this.fullname = ''
     this.mobile = ''
     this.email = ''
+    this.admin = false
     this.loaded = false
   }
 })

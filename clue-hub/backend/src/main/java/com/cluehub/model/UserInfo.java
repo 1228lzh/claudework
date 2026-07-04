@@ -14,4 +14,5 @@ public class UserInfo implements Serializable {
     private String fullname;
     private String mobile;
     private String email;
+    private boolean admin;
 }
