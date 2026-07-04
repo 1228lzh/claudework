@@ -4,8 +4,10 @@ import com.cluehub.dto.ApiResponse;
 import com.cluehub.dto.ClueSubmitDTO;
 import com.cluehub.entity.Clue;
 import com.cluehub.entity.ClueDraft;
+import com.cluehub.model.UserInfo;
 import com.cluehub.service.ClueService;
 import com.cluehub.service.FileService;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,31 +24,40 @@ public class ClueController {
     private final ClueService clueService;
     private final FileService fileService;
 
+    private String getUserId(HttpServletRequest request) {
+        UserInfo user = (UserInfo) request.getAttribute("currentUser");
+        return user != null ? user.getUserId() : null;
+    }
+
     /** 提交线索 → 进入初筛中 */
     @PostMapping("/submit")
-    public ApiResponse<Clue> submit(@Valid @RequestBody ClueSubmitDTO dto) {
+    public ApiResponse<Clue> submit(@Valid @RequestBody ClueSubmitDTO dto,
+                                     HttpServletRequest request) {
+        dto.setWecomUserId(getUserId(request));
         Clue clue = clueService.submit(dto);
         return ApiResponse.ok("提交成功", clue);
     }
 
-    /** 暂存线索 → 状态为新建（不做必填校验，允许分步填写） */
+    /** 暂存线索 → 状态为新建 */
     @PostMapping("/save")
-    public ApiResponse<Clue> save(@RequestBody ClueSubmitDTO dto) {
+    public ApiResponse<Clue> save(@RequestBody ClueSubmitDTO dto,
+                                   HttpServletRequest request) {
+        dto.setWecomUserId(getUserId(request));
         Clue clue = clueService.saveNew(dto);
         return ApiResponse.ok("暂存成功", clue);
     }
 
-    /** 获取草稿（旧草稿表） */
+    /** 获取草稿 */
     @GetMapping("/draft")
-    public ApiResponse<ClueDraft> getDraft(@RequestParam String wecomUserId) {
-        Optional<ClueDraft> draft = clueService.getDraft(wecomUserId);
+    public ApiResponse<ClueDraft> getDraft(HttpServletRequest request) {
+        Optional<ClueDraft> draft = clueService.getDraft(getUserId(request));
         return draft.map(ApiResponse::ok).orElse(ApiResponse.ok(null));
     }
 
-    /** 获取用户暂存的线索（状态=new） */
+    /** 获取用户暂存的线索 */
     @GetMapping("/pending")
-    public ApiResponse<Clue> getPending(@RequestParam String wecomUserId) {
-        return clueService.getPending(wecomUserId)
+    public ApiResponse<Clue> getPending(HttpServletRequest request) {
+        return clueService.getPending(getUserId(request))
                 .map(ApiResponse::ok)
                 .orElse(ApiResponse.ok(null));
     }
@@ -61,13 +72,16 @@ public class ClueController {
 
     /** 我的线索列表 */
     @GetMapping("/my")
-    public ApiResponse<List<Clue>> myClues(@RequestParam String wecomUserId) {
-        return ApiResponse.ok(clueService.getUserClues(wecomUserId));
+    public ApiResponse<List<Clue>> myClues(HttpServletRequest request) {
+        return ApiResponse.ok(clueService.getUserClues(getUserId(request)));
     }
 
-    /** 重新提交（退回补充后） */
+    /** 重新提交 */
     @PutMapping("/{id}/resubmit")
-    public ApiResponse<Clue> resubmit(@PathVariable Long id, @Valid @RequestBody ClueSubmitDTO dto) {
+    public ApiResponse<Clue> resubmit(@PathVariable Long id,
+                                       @Valid @RequestBody ClueSubmitDTO dto,
+                                       HttpServletRequest request) {
+        dto.setWecomUserId(getUserId(request));
         Clue clue = clueService.update(id, dto);
         return ApiResponse.ok("重新提交成功", clue);
     }
