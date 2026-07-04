@@ -146,11 +146,16 @@ async function onDelete(clue) {
       message: `确定删除线索「${clue.clueNo}」吗？删除后不可恢复。`,
     })
     clues.value = clues.value.filter(c => c.id !== clue.id)
-    await deleteClue(clue.id)
-    showToast('已删除')
+    try {
+      await deleteClue(clue.id)
+    } catch (e) {
+      loadClues()
+      showToast('删除失败，请重试')
+      return
+    }
+    showToast('删除成功')
   } catch (e) {
-    loadClues()
-    if (e !== 'cancel') showToast('删除失败')
+    // user cancelled
   }
 }
 
