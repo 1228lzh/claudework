@@ -142,7 +142,7 @@ function clearCache() {
 function onDelete(clue) {
   showConfirmDialog({
     title: '确认删除',
-    message: `确定删除线索「${clue.clueName}」吗？删除后不可恢复。`,
+    message: `确定删除线索「${clue.clueNo}」吗？删除后不可恢复。`,
   }).then(() => {
     deleteClue(clue.id).then(() => {
       showToast('已删除')
