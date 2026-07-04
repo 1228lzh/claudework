@@ -68,20 +68,24 @@ public class AuthController {
                     feilian.getBaseUri() + "/oauth2/token",
                     new HttpEntity<>(body, headers), String.class);
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode tokenJson = mapper.readTree(tokenResp.getBody());
+            String tokenBody = tokenResp.getBody();
+            log.info("Token response: {}", tokenBody);
+            JsonNode tokenJson = mapper.readTree(tokenBody);
             String accessToken = tokenJson.get("access_token").asText();
+            log.info("Got access_token: {}", accessToken.substring(0, Math.min(8, accessToken.length())) + "...");
             HttpHeaders userHeaders = new HttpHeaders();
             userHeaders.setBearerAuth(accessToken);
             ResponseEntity<String> userResp = restTemplate.exchange(
                     feilian.getBaseUri() + "/oauth2/userinfo/normal",
                     HttpMethod.GET, new HttpEntity<>(userHeaders), String.class);
-            JsonNode userJson = mapper.readTree(userResp.getBody());
-            JsonNode data = userJson.get("data");
+            String userBody = userResp.getBody();
+            log.info("Userinfo response: {}", userBody);
+            JsonNode userJson = mapper.readTree(userBody);
             UserInfo user = new UserInfo();
-            user.setUserId(data.get("user_id").asText());
-            user.setFullname(data.has("full_name") ? data.get("full_name").asText() : "");
-            user.setMobile(data.has("mobile") ? data.get("mobile").asText() : "");
-            user.setEmail(data.has("email") ? data.get("email").asText() : "");
+            user.setUserId(userJson.get("user_id").asText());
+            user.setFullname(userJson.has("fullname") ? userJson.get("fullname").asText() : "");
+            user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
+            user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
             session.setAttribute(SESSION_USER_KEY, user);
             response.sendRedirect("/");
         } catch (Exception e) {
