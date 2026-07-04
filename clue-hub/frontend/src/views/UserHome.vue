@@ -77,12 +77,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { getMyClues, deleteClue } from '../api'
 import { showToast, showSuccessToast, showFailToast, showConfirmDialog } from 'vant'
 import { userStore } from '../stores/user.js'
 
+const route = useRoute()
 const router = useRouter()
 const activeTab = ref('clues')
 const clues = ref([])
@@ -144,22 +145,28 @@ async function onDelete(clue) {
     await showConfirmDialog({
       title: '确认删除',
       message: `确定删除线索「${clue.clueNo}」吗？删除后不可恢复。`,
+      confirmButtonText: '删除',
+      cancelButtonText: '取消',
     })
-    clues.value = clues.value.filter(c => c.id !== clue.id)
-    try {
-      await deleteClue(clue.id)
-    } catch (e) {
-      loadClues()
-      showFailToast('删除失败，请重试')
-      return
-    }
-    setTimeout(() => showSuccessToast('删除成功'), 300)
-  } catch (e) {
-    // user cancelled
+  } catch {
+    return
+  }
+  clues.value = clues.value.filter(c => c.id !== clue.id)
+  try {
+    const { data } = await deleteClue(clue.id)
+    if (data.code !== 0) throw new Error(data.message)
+    showSuccessToast('删除成功')
+  } catch {
+    loadClues()
+    showFailToast('删除失败')
   }
 }
 
 onMounted(loadClues)
+
+watch(() => route.path, (path) => {
+  if (path === '/') loadClues()
+})
 </script>
 
 <style scoped>
