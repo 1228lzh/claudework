@@ -134,6 +134,7 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { submitClue, saveClue, getPending, getClueDetail, uploadClueFile } from '../api'
 import { showConfirmDialog } from 'vant'
+import { userStore } from '../stores/user.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -145,7 +146,7 @@ const form = reactive({
   reporterName: '',
   reporterDept: '',
   reporterContact: '',
-  wecomUserId: 'user_001',
+  wecomUserId: '',
   // 第二步
   clueName: '',
   clueType: '',
@@ -399,6 +400,7 @@ async function uploadFiles(clueId) {
 async function onSubmit() {
   submitting.value = true
   try {
+    form.wecomUserId = userStore.userId
     const payload = buildPayload()
     const { data } = await submitClue(payload)
     if (data.code === 0) {
