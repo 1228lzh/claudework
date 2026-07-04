@@ -20,7 +20,11 @@
             @click="goToClue(clue)">
             <div class="clue-header">
               <span class="clue-no">{{ clue.clueNo }}</span>
-              <span :class="['stage-tag', clue.status]">{{ statusLabel(clue.status) }}</span>
+              <div class="clue-header-right">
+                <span :class="['stage-tag', clue.status]">{{ statusLabel(clue.status) }}</span>
+                <van-icon v-if="clue.status === 'new'" name="delete-o" size="16" color="#999"
+                  class="delete-btn" @click.stop="onDelete(clue)" />
+              </div>
             </div>
             <div class="clue-title">{{ clue.clueName }}</div>
             <div class="clue-meta">
@@ -47,9 +51,9 @@
           <van-icon name="user-circle-o" size="60" color="#1989fa" />
         </div>
         <div class="profile-info">
-          <div class="name">{{ user.reporterName || '未设置' }}</div>
-          <div class="dept">{{ user.reporterDept || '未知部门' }}</div>
-          <div class="contact">{{ user.reporterContact || '未知联系方式' }}</div>
+          <div class="name">{{ userStore.fullname || '未设置' }}</div>
+          <div class="dept">{{ '' || '未知部门' }}</div>
+          <div class="contact">{{ userStore.mobile || '未知联系方式' }}</div>
         </div>
       </div>
 
@@ -76,20 +80,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getMyClues } from '../api'
-import { showToast } from 'vant'
+import { getMyClues, deleteClue } from '../api'
+import { showToast, showConfirmDialog } from 'vant'
+import { userStore } from '../stores/user.js'
 
 const router = useRouter()
 const activeTab = ref('clues')
 const clues = ref([])
 const refreshing = ref(false)
-
-// 模拟用户信息（实际从企微OAuth获取）
-const user = ref({
-  reporterName: '王建国',
-  reporterDept: '市场部',
-  reporterContact: '138xxxx8888'
-})
 
 const inReviewCount = computed(() =>
   clues.value.filter(c => ['initial_screening', 'judging', 'verifying'].includes(c.status)).length
@@ -119,7 +117,7 @@ function formatDate(d) {
 
 async function loadClues() {
   try {
-    const { data } = await getMyClues('user_001')
+    const { data } = await getMyClues()
     if (data.code === 0) clues.value = data.data || []
   } catch (e) { /* ignore */ }
 }
@@ -140,6 +138,20 @@ function goToClue(clue) {
 
 function clearCache() {
   showToast('缓存已清理')
+}
+
+function onDelete(clue) {
+  showConfirmDialog({
+    title: '确认删除',
+    message: `确定删除线索「${clue.clueName}」吗？删除后不可恢复。`,
+  }).then(() => {
+    deleteClue(clue.id).then(() => {
+      showToast('已删除')
+      loadClues()
+    }).catch(() => {
+      showToast('删除失败')
+    })
+  }).catch(() => {})
 }
 
 onMounted(loadClues)
@@ -169,6 +181,14 @@ onMounted(loadClues)
   margin-bottom: 8px;
 }
 .clue-no { font-size: 12px; color: #999; }
+.clue-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.delete-btn {
+  padding: 2px;
+}
 .clue-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; color: #333; }
 .clue-meta { display: flex; justify-content: flex-end; font-size: 12px; color: #999; }
 
