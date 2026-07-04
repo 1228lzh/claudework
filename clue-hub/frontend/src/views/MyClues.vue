@@ -61,7 +61,7 @@ function formatDate(date) {
 
 async function loadClues() {
   try {
-    const { data } = await getMyClues('user_001')
+    const { data } = await getMyClues()
     if (data.code === 0) {
       clues.value = data.data || []
     }
