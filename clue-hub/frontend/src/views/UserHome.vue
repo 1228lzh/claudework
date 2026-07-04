@@ -153,7 +153,7 @@ async function onDelete(clue) {
       showFailToast('删除失败，请重试')
       return
     }
-    showSuccessToast('删除成功')
+    setTimeout(() => showSuccessToast('删除成功'), 300)
   } catch (e) {
     // user cancelled
   }
