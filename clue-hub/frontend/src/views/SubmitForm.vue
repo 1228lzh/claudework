@@ -16,8 +16,8 @@
     <div class="step-content">
       <!-- 第一步：谁报的 -->
       <template v-if="currentStep === 0">
-        <van-field v-model="form.wecomUserId" label="报备人工号" readonly />
-        <van-field v-model="form.reporterName" label="报备人姓名" readonly />
+        <van-field v-model="form.wecomUserId" label="报备人工号" readonly disabled />
+        <van-field v-model="form.reporterName" label="报备人姓名" readonly disabled />
         <van-field v-model="form.reporterDept" label="部门" placeholder="请输入部门" />
         <van-field v-model="form.reporterContact" label="联系方式" placeholder="请输入联系方式" />
       </template>
