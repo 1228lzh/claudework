@@ -3,29 +3,53 @@
     <van-nav-bar title="审核详情" left-text="返回" left-arrow @click-left="router.back" fixed placeholder />
 
     <div v-if="clue" class="detail-content">
-      <!-- 线索信息 -->
+      <!-- 平铺表单（只读） -->
       <van-cell-group title="谁报的">
-        <van-cell title="报备人" :value="clue.reporterName" />
-        <van-cell title="部门/单位" :value="clue.reporterDept || '-'" />
-        <van-cell title="联系方式" :value="clue.reporterContact || '-'" />
+        <van-field v-model="form.reporterName" label="报备人" readonly />
+        <van-field v-model="form.reporterDept" label="部门/单位" readonly />
+        <van-field v-model="form.reporterContact" label="联系方式" readonly />
       </van-cell-group>
+
       <van-cell-group title="什么线索">
-        <van-cell title="线索名称" :value="clue.clueName" />
-        <van-cell title="线索类型" :value="clue.clueType" />
-        <van-cell v-if="clue.clueTypeOther" title="其他类型" :value="clue.clueTypeOther" />
-        <van-cell title="线索描述" :label="clue.clueDesc" />
+        <van-field v-model="form.clueName" label="线索名称" readonly />
+        <van-field v-model="form.clueType" label="线索类型" readonly />
+        <van-field v-if="form.clueTypeOther" v-model="form.clueTypeOther" label="其他类型" readonly />
+        <div class="field-label">线索描述</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.clueDesc" class="desc-textarea" rows="5" readonly />
+          <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
+        </div>
       </van-cell-group>
+
       <van-cell-group title="线索来源">
-        <van-cell title="信息来源" :value="clue.infoSource || '-'" />
-        <van-cell title="可靠度" :value="clue.reliability || '-'" />
-        <van-cell title="预计市场规模" :value="clue.marketSize || '-'" />
+        <div class="field-label">信息来源（可多选）</div>
+        <div class="cb-group">
+          <span v-for="item in infoSourceOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.infoSourceArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.infoSourceArr.includes('其他')" v-model="form.infoSourceOther" label="其他来源" readonly />
+        <van-field v-model="form.reliability" label="信息可靠度" readonly />
+        <div class="field-label">预计市场规模</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.marketSize" class="desc-textarea" rows="4" readonly />
+          <div class="desc-count">{{ (form.marketSize || '').length }} / 500</div>
+        </div>
       </van-cell-group>
+
       <van-cell-group title="线索判断">
-        <van-cell title="涉及品类" :value="clue.productLines || '-'" />
-        <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
-        <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
-        <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
-        <van-cell v-if="clue.ipdApprovedAt" title="IPD立项时间" :value="formatDate(clue.ipdApprovedAt)" />
+        <div class="field-label">涉及品类/产品线（可多选）</div>
+        <div class="cb-group">
+          <span v-for="item in productLineOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.productLinesArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.productLinesArr.includes('全品类')" v-model="form.productLinesDetail" label="全品类说明" readonly />
+        <div class="field-label">目标客户群体（可多选）</div>
+        <div class="cb-group">
+          <span v-for="item in customerOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.targetCustomersArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" readonly />
+        <van-field v-model="form.urgency" label="时间紧迫度" readonly />
+        <van-field v-model="form.productStatus" label="竞品情况" readonly />
+        <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家" readonly />
+        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>
 
       <!-- 附件 -->
@@ -79,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl } from '../api'
 
@@ -103,6 +127,18 @@ const attachments = ref([])
 const reviewComment = ref('')
 const pendingReviewFiles = ref([])
 
+const form = reactive({
+  reporterName: '', reporterDept: '', reporterContact: '',
+  clueName: '', clueType: '', clueTypeOther: '', clueDesc: '',
+  infoSourceArr: [], infoSourceOther: '', reliability: '', marketSize: '',
+  productLinesArr: [], productLinesDetail: '', targetCustomersArr: [], targetCustomersOther: '',
+  urgency: '', productStatus: '', productStatusDetail: ''
+})
+
+const infoSourceOptions = ['客户/业务直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '装修公司/施工方反馈', '行业同事反馈', '行业展会/论坛/交流', '产品观察/产品情报', '行业媒体/行业报告', '政策/标准/法规文件', '其他']
+const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃气管道', '新风管道', '净水/水处理', '全品类']
+const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
+
 const stageLabels = {
   initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项'
 }
@@ -122,13 +158,37 @@ function formatSize(bytes) {
 const reviewableStatuses = ['initial_screening', 'judging', 'verifying']
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
 
+function loadClueIntoForm(clueData) {
+  form.reporterName = clueData.reporterName || ''
+  form.reporterDept = clueData.reporterDept || ''
+  form.reporterContact = clueData.reporterContact || ''
+  form.clueName = clueData.clueName || ''
+  form.clueType = clueData.clueType || ''
+  form.clueTypeOther = clueData.clueTypeOther || ''
+  form.clueDesc = clueData.clueDesc || ''
+  if (clueData.infoSource) form.infoSourceArr = clueData.infoSource.split(',')
+  form.infoSourceOther = clueData.infoSourceOther || ''
+  form.reliability = clueData.reliability || ''
+  form.marketSize = clueData.marketSize || ''
+  if (clueData.productLines) form.productLinesArr = clueData.productLines.split(',')
+  form.productLinesDetail = clueData.productLinesDetail || ''
+  if (clueData.targetCustomers) form.targetCustomersArr = clueData.targetCustomers.split(',')
+  form.targetCustomersOther = clueData.targetCustomersOther || ''
+  form.urgency = clueData.urgency || ''
+  form.productStatus = clueData.productStatus || ''
+  form.productStatusDetail = clueData.productStatusDetail || ''
+}
+
 onMounted(async () => {
   const id = route.params.id
   try {
     const [clueRes, historyRes, attRes] = await Promise.all([
       getClueDetail(id), getReviewHistory(id), getClueAttachments(id)
     ])
-    if (clueRes.data.code === 0) clue.value = clueRes.data.data
+    if (clueRes.data.code === 0) {
+      clue.value = clueRes.data.data
+      loadClueIntoForm(clue.value)
+    }
     if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
   } catch (e) { console.error('加载失败', e) }
@@ -175,6 +235,84 @@ function downloadFile(attachmentId) {
   .admin-detail { padding-bottom: 0; }
 }
 .detail-content { padding-top: 8px; }
+
+.field-label {
+  padding: 12px 16px 8px;
+  font-size: 14px;
+  color: #323233;
+  font-weight: 500;
+}
+.desc-textarea-wrapper {
+  margin: 0 16px;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.desc-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: none;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #323233;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+  outline: none;
+  background: #f7f8fa;
+  color: #666;
+  resize: none;
+}
+.desc-count {
+  text-align: right;
+  padding: 4px 12px 8px;
+  font-size: 12px;
+  color: #999;
+  background: #fff;
+}
+.cb-group {
+  padding: 0 16px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #f5f5f5;
+  color: #c8c9cc;
+}
+.cb-tag::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 1px solid #c8c9cc;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.cb-tag--checked {
+  background: #e8f4ff;
+  color: #323233;
+  font-weight: 500;
+}
+.cb-tag--checked::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #1989fa;
+  background: #1989fa;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
+
 .review-record {
   padding: 12px 16px;
   border-bottom: 1px solid #ebedf0;

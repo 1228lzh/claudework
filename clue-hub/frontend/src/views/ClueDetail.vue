@@ -9,83 +9,65 @@
         <span class="clue-no">{{ clue.clueNo }}</span>
       </div>
 
-      <!-- 待补充模式：平铺可编辑 -->
-      <template v-if="clue.status === 'pending_supplement'">
-        <van-cell-group title="谁报的">
-          <van-field v-model="form.reporterName" label="报备人" placeholder="请输入姓名" />
-          <van-field v-model="form.reporterDept" label="部门/单位" placeholder="请输入部门/单位" />
-          <van-field v-model="form.reporterContact" label="联系方式" placeholder="请输入联系方式" />
-        </van-cell-group>
+      <!-- 平铺表单（可编辑/只读统一布局） -->
+      <van-cell-group title="谁报的">
+        <van-field v-model="form.reporterName" label="报备人" :readonly="!isEditable" :placeholder="isEditable ? '请输入姓名' : ''" />
+        <van-field v-model="form.reporterDept" label="部门/单位" :readonly="!isEditable" :placeholder="isEditable ? '请输入部门/单位' : ''" />
+        <van-field v-model="form.reporterContact" label="联系方式" :readonly="!isEditable" :placeholder="isEditable ? '请输入联系方式' : ''" />
+      </van-cell-group>
 
-        <van-cell-group title="什么线索">
-          <van-field v-model="form.clueName" label="线索名称" placeholder="一句话描述，不超过50字" maxlength="50" />
-          <van-field v-model="form.clueType" label="线索类型" is-link readonly @click="showClueTypePicker = true" placeholder="请选择线索类型" />
-          <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" placeholder="请说明" />
-          <div class="field-label">线索描述</div>
-          <div class="desc-textarea-wrapper">
-            <textarea v-model="form.clueDesc" class="desc-textarea" rows="5"
-              placeholder="3-5句话说明：是什么 + 为什么是机会" maxlength="500" />
-            <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
-          </div>
-        </van-cell-group>
+      <van-cell-group title="什么线索">
+        <van-field v-model="form.clueName" label="线索名称" :readonly="!isEditable" :placeholder="isEditable ? '一句话描述，不超过50字' : ''" maxlength="50" />
+        <van-field v-model="form.clueType" label="线索类型" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showClueTypePicker = true : null" :placeholder="isEditable ? '请选择线索类型' : ''" />
+        <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
+        <div class="field-label">线索描述</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.clueDesc" class="desc-textarea" rows="5"
+            :placeholder="isEditable ? '3-5句话说明：是什么 + 为什么是机会' : ''" maxlength="500" :readonly="!isEditable" />
+          <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
+        </div>
+      </van-cell-group>
 
-        <van-cell-group title="线索来源">
-          <div class="field-label">信息来源（可多选）</div>
-          <van-checkbox-group v-model="form.infoSourceArr" direction="horizontal" class="cb-group">
-            <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
-          </van-checkbox-group>
-          <van-field v-if="form.infoSourceArr.includes('其他')" v-model="form.infoSourceOther" label="其他来源" placeholder="请说明" />
-          <van-field v-model="form.reliability" label="信息可靠度" is-link readonly @click="showReliabilityPicker = true" placeholder="请选择" />
-          <div class="field-label">预计市场规模</div>
-          <div class="desc-textarea-wrapper">
-            <textarea v-model="form.marketSize" class="desc-textarea" rows="4"
-              placeholder="请描述预计市场规模、增长趋势及相关数据" maxlength="500" />
-            <div class="desc-count">{{ (form.marketSize || '').length }} / 500</div>
-          </div>
-        </van-cell-group>
+      <van-cell-group title="线索来源">
+        <div class="field-label">信息来源（可多选）</div>
+        <van-checkbox-group v-if="isEditable" v-model="form.infoSourceArr" direction="horizontal" class="cb-group">
+          <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+        </van-checkbox-group>
+        <div v-else class="cb-group">
+          <span v-for="item in infoSourceOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.infoSourceArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.infoSourceArr.includes('其他')" v-model="form.infoSourceOther" label="其他来源" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
+        <van-field v-model="form.reliability" label="信息可靠度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showReliabilityPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
+        <div class="field-label">预计市场规模</div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.marketSize" class="desc-textarea" rows="4"
+            :placeholder="isEditable ? '请描述预计市场规模、增长趋势及相关数据' : ''" maxlength="500" :readonly="!isEditable" />
+          <div class="desc-count">{{ (form.marketSize || '').length }} / 500</div>
+        </div>
+      </van-cell-group>
 
-        <van-cell-group title="线索判断">
-          <div class="field-label">涉及品类/产品线（可多选）</div>
-          <van-checkbox-group v-model="form.productLinesArr" direction="horizontal" class="cb-group">
-            <van-checkbox v-for="item in productLineOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
-          </van-checkbox-group>
-          <van-field v-if="form.productLinesArr.includes('全品类')" v-model="form.productLinesDetail" label="全品类说明" placeholder="请说明具体品类" />
-          <div class="field-label">目标客户群体（可多选）</div>
-          <van-checkbox-group v-model="form.targetCustomersArr" direction="horizontal" class="cb-group">
-            <van-checkbox v-for="item in customerOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
-          </van-checkbox-group>
-          <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" placeholder="请说明" />
-          <van-field v-model="form.urgency" label="时间紧迫度" is-link readonly @click="showUrgencyPicker = true" placeholder="请选择" />
-          <van-field v-model="form.productStatus" label="竞品情况（选填）" is-link readonly @click="showProductStatusPicker = true" placeholder="请选择" />
-          <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" placeholder="请说明具体竞品" />
-        </van-cell-group>
-      </template>
-
-      <!-- 非待补充模式：只读 -->
-      <template v-else>
-        <van-cell-group title="谁报的">
-          <van-cell title="报备人" :value="clue.reporterName" />
-          <van-cell title="部门/单位" :value="clue.reporterDept || '-'" />
-          <van-cell title="联系方式" :value="clue.reporterContact || '-'" />
-        </van-cell-group>
-        <van-cell-group title="什么线索">
-          <van-cell title="线索名称" :value="clue.clueName" />
-          <van-cell title="线索类型" :value="clue.clueType" />
-          <van-cell title="线索描述" :label="clue.clueDesc" />
-        </van-cell-group>
-        <van-cell-group title="线索来源">
-          <van-cell title="信息来源" :value="clue.infoSource || '-'" />
-          <van-cell title="可靠度" :value="clue.reliability || '-'" />
-          <van-cell title="预计市场规模" :value="clue.marketSize || '-'" />
-        </van-cell-group>
-        <van-cell-group title="线索判断">
-          <van-cell title="涉及品类" :value="clue.productLines || '-'" />
-          <van-cell title="目标客户" :value="clue.targetCustomers || '-'" />
-          <van-cell title="时间紧迫度" :value="clue.urgency || '-'" />
-          <van-cell title="竞品情况" :value="clue.productStatus || '-'" />
-          <van-cell v-if="clue.ipdApprovedAt" title="IPD立项时间" :value="formatDate(clue.ipdApprovedAt)" />
-        </van-cell-group>
-      </template>
+      <van-cell-group title="线索判断">
+        <div class="field-label">涉及品类/产品线（可多选）</div>
+        <van-checkbox-group v-if="isEditable" v-model="form.productLinesArr" direction="horizontal" class="cb-group">
+          <van-checkbox v-for="item in productLineOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+        </van-checkbox-group>
+        <div v-else class="cb-group">
+          <span v-for="item in productLineOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.productLinesArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.productLinesArr.includes('全品类')" v-model="form.productLinesDetail" label="全品类说明" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体品类' : ''" />
+        <div class="field-label">目标客户群体（可多选）</div>
+        <van-checkbox-group v-if="isEditable" v-model="form.targetCustomersArr" direction="horizontal" class="cb-group">
+          <van-checkbox v-for="item in customerOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+        </van-checkbox-group>
+        <div v-else class="cb-group">
+          <span v-for="item in customerOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.targetCustomersArr.includes(item) }]">{{ item }}</span>
+        </div>
+        <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
+        <van-field v-model="form.urgency" label="时间紧迫度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showUrgencyPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
+        <van-field v-model="form.productStatus" label="竞品情况（选填）" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showProductStatusPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
+        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
+        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
+      </van-cell-group>
 
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
@@ -107,7 +89,7 @@
     </div>
 
     <!-- 待补充底部按钮 -->
-    <div v-if="clue && clue.status === 'pending_supplement'" class="supplement-bar safe-bottom">
+    <div v-if="isEditable" class="supplement-bar safe-bottom">
       <van-button @click="saveCurrentDraft" plain>暂存</van-button>
       <van-button type="primary" @click="onResubmit" :loading="submitting">提交线索</van-button>
     </div>
@@ -125,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue } from '../api'
 import { showConfirmDialog } from 'vant'
@@ -136,6 +118,8 @@ const clue = ref(null)
 const reviewHistory = ref([])
 const attachments = ref([])
 const submitting = ref(false)
+
+const isEditable = computed(() => clue.value?.status === 'pending_supplement')
 
 const form = reactive({
   reporterName: '', reporterDept: '', reporterContact: '',
@@ -227,9 +211,7 @@ onMounted(async () => {
     ])
     if (clueRes.data.code === 0) {
       clue.value = clueRes.data.data
-      if (clue.value.status === 'pending_supplement') {
-        loadClueIntoForm(clue.value)
-      }
+      loadClueIntoForm(clue.value)
     }
     if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
@@ -351,6 +333,7 @@ function formatSize(bytes) {
   outline: none;
 }
 .desc-textarea::placeholder { color: #c8c9cc; }
+.desc-textarea[readonly] { background: #f7f8fa; color: #666; resize: none; }
 .desc-count {
   text-align: right;
   padding: 4px 12px 8px;
@@ -365,6 +348,41 @@ function formatSize(bytes) {
   gap: 8px;
 }
 .cb-group :deep(.van-checkbox) { margin: 0; }
+
+.cb-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #f5f5f5;
+  color: #c8c9cc;
+}
+.cb-tag::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border: 1px solid #c8c9cc;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.cb-tag--checked {
+  background: #e8f4ff;
+  color: #323233;
+  font-weight: 500;
+}
+.cb-tag--checked::before {
+  content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-color: #1989fa;
+  background: #1989fa;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+}
 
 .review-record {
   padding: 12px 16px;
