@@ -72,11 +72,12 @@ public class AuthController {
                     feilian.getBaseUri() + "/oauth2/userinfo/normal",
                     HttpMethod.GET, new HttpEntity<>(userHeaders), String.class);
             JsonNode userJson = mapper.readTree(userResp.getBody());
+            JsonNode data = userJson.get("data");
             UserInfo user = new UserInfo();
-            user.setUserId(userJson.get("user_id").asText());
-            user.setFullname(userJson.has("fullname") ? userJson.get("fullname").asText() : "");
-            user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
-            user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
+            user.setUserId(data.get("user_id").asText());
+            user.setFullname(data.has("full_name") ? data.get("full_name").asText() : "");
+            user.setMobile(data.has("mobile") ? data.get("mobile").asText() : "");
+            user.setEmail(data.has("email") ? data.get("email").asText() : "");
             session.setAttribute(SESSION_USER_KEY, user);
             response.sendRedirect("/");
         } catch (Exception e) {
