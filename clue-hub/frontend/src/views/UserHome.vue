@@ -80,7 +80,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyClues, deleteClue } from '../api'
-import { showToast, showConfirmDialog } from 'vant'
+import { showToast, showSuccessToast, showFailToast, showConfirmDialog } from 'vant'
 import { userStore } from '../stores/user.js'
 
 const router = useRouter()
@@ -150,10 +150,10 @@ async function onDelete(clue) {
       await deleteClue(clue.id)
     } catch (e) {
       loadClues()
-      showToast('删除失败，请重试')
+      showFailToast('删除失败，请重试')
       return
     }
-    showToast('删除成功')
+    showSuccessToast('删除成功')
   } catch (e) {
     // user cancelled
   }
