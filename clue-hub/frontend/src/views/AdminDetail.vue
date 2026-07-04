@@ -78,6 +78,7 @@
         <!-- 审核附件上传 -->
         <div class="review-upload">
           <van-uploader :after-read="onReviewFileRead" multiple :max-count="5"
+            accept="*" upload-icon="plus"
             @delete="onReviewFileDelete" />
         </div>
 

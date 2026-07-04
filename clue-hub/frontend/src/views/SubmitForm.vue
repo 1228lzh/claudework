@@ -87,7 +87,7 @@
         <div class="upload-section">
           <div class="field-label">上传附件（不限制格式和大小）</div>
           <van-uploader :after-read="onFileRead" multiple :max-count="10"
-            accept="*" result-type="file" @delete="onFileDelete" />
+            accept="*" upload-icon="plus" result-type="file" @delete="onFileDelete" />
           <div class="hint-text">支持图片、视频、文档等所有格式</div>
 
           <!-- 待上传文件列表 -->
