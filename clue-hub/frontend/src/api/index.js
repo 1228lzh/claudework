@@ -15,13 +15,13 @@ export const submitClue = (data) => api.post('/clue/submit', data)
 export const saveClue = (data) => api.post('/clue/save', data)
 
 /** 获取暂存的线索 */
-export const getPending = (wecomUserId) => api.get('/clue/pending', { params: { wecomUserId } })
+export const getPending = () => api.get('/clue/pending')
 
 /** 获取线索详情 */
 export const getClueDetail = (id) => api.get(`/clue/${id}`)
 
 /** 我的线索列表 */
-export const getMyClues = (wecomUserId) => api.get('/clue/my', { params: { wecomUserId } })
+export const getMyClues = () => api.get('/clue/my')
 
 /** 重新提交线索（退回补充后） */
 export const resubmitClue = (id, data) => api.put(`/clue/${id}/resubmit`, data)
@@ -37,6 +37,9 @@ export const uploadClueFile = (id, file) => {
 
 /** 获取线索附件列表 */
 export const getClueAttachments = (id) => api.get(`/clue/${id}/attachments`)
+
+/** 删除新建状态的线索 */
+export const deleteClue = (id) => api.delete(`/clue/${id}`)
 
 // ===== 审核相关 =====
 
