@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  # ========== Nginx（前端 + 反向代理）==========
+  frontend:
+    build: ./frontend
+    container_name: clue-hub-nginx
+    ports:
+      - "80:80"
+      # HTTPS（启用时取消注释）
+      # - "443:443"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ========== Spring Boot 后端 ==========
+  backend:
+    build: ./backend
+    container_name: clue-hub-backend
+    expose:
+      - "8080"
+    environment:
+      # 数据库连接（容器内通过服务名 mysql 访问）
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/clue_hub?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-root}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-root123456}
+      # 文件上传路径
+      - APP_UPLOAD_PATH=/data/uploads
+      # 企微配置
+      - APP_WECOM_CORP_ID=${WECOM_CORP_ID}
+      - APP_WECOM_AGENT_ID=${WECOM_AGENT_ID}
+      - APP_WECOM_SECRET=${WECOM_SECRET}
+      # 飞连 OIDC SSO 配置
+      - FEILIAN_CLIENT_ID=${FEILIAN_CLIENT_ID}
+      - FEILIAN_CLIENT_SECRET=${FEILIAN_CLIENT_SECRET}
+      - FEILIAN_REDIRECT_URI=${FEILIAN_REDIRECT_URI}
+      - FEILIAN_POST_LOGOUT_REDIRECT_URI=${FEILIAN_POST_LOGOUT_REDIRECT_URI}
+    volumes:
+      - uploads:/data/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ========== MySQL 数据库 ==========
+  mysql:
+    image: mysql:8.0
+    container_name: clue-hub-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD:-root123456}
+      - MYSQL_DATABASE=clue_hub
+      - MYSQL_CHARSET=utf8mb4
+      - MYSQL_COLLATION=utf8mb4_general_ci
+    ports:
+      - "3306:3306"          # 开发阶段暴露，生产可移除
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro  # 首次启动自动建表
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-root123456}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  uploads:
