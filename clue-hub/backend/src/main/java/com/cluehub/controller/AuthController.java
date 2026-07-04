@@ -54,7 +54,8 @@ public class AuthController {
                          HttpSession session, HttpServletResponse response) throws IOException {
         String savedState = (String) session.getAttribute(SESSION_STATE_KEY);
         if (savedState == null || !savedState.equals(state)) {
-            response.sendError(400, "Invalid state");
+            log.warn("State mismatch: saved={}, received={}", savedState, state);
+            response.sendRedirect("/auth/login");
             return;
         }
         session.removeAttribute(SESSION_STATE_KEY);
