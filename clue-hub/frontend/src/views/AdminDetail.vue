@@ -220,7 +220,10 @@ async function doReview(action) {
   }
 }
 
-function onReviewFileRead(file) { pendingReviewFiles.value.push(file) }
+function onReviewFileRead(files) {
+  const items = Array.isArray(files) ? files : [files]
+  pendingReviewFiles.value.push(...items)
+}
 function onReviewFileDelete(file) {
   pendingReviewFiles.value = pendingReviewFiles.value.filter(f => f !== file)
 }

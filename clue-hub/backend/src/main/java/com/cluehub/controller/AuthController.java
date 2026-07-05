@@ -23,7 +23,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @RestController
@@ -35,12 +37,12 @@ public class AuthController {
     private final SessionRegistry sessionRegistry;
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String SESSION_USER_KEY = "currentUser";
-    private static final String SESSION_STATE_KEY = "oauth2State";
+    private final Map<String, String> stateStore = new ConcurrentHashMap<>();
 
     @GetMapping("/login")
     public void login(HttpSession session, HttpServletResponse response) throws IOException {
         String state = UUID.randomUUID().toString();
-        session.setAttribute(SESSION_STATE_KEY, state);
+        stateStore.put(state, "1");
         String url = feilian.getBaseUri() + "/oauth2/authorize"
                 + "?client_id=" + feilian.getClientId()
                 + "&redirect_uri=" + feilian.getRedirectUri()
@@ -52,13 +54,11 @@ public class AuthController {
     @GetMapping("/callback")
     public void callback(@RequestParam String code, @RequestParam String state,
                          HttpSession session, HttpServletResponse response) throws IOException {
-        String savedState = (String) session.getAttribute(SESSION_STATE_KEY);
-        if (savedState == null || !savedState.equals(state)) {
-            log.warn("State mismatch: saved={}, received={}", savedState, state);
+        if (stateStore.remove(state) == null) {
+            log.warn("State invalid: {}", state);
             response.sendRedirect("/auth/login");
             return;
         }
-        session.removeAttribute(SESSION_STATE_KEY);
         try {
             MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
             body.add("client_id", feilian.getClientId());
