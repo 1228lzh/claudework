@@ -3,50 +3,36 @@ package com.cluehub.service;
 import com.cluehub.entity.Attachment;
 import com.cluehub.repository.AttachmentRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class FileService {
 
     private final AttachmentRepository attachmentRepository;
-
-    @Value("${app.upload-path:./uploads}")
-    private String uploadPath;
+    private final FileStorage fileStorage;
 
     /**
-     * 上传附件（线索附件或审核附件）
+     * 上传附件
      */
-    public Attachment upload(MultipartFile file, Long clueId, Long reviewRecordId, String attachType, String userId) throws IOException {
-        Path uploadDir = Paths.get(uploadPath, attachType);
-        Files.createDirectories(uploadDir);
-
-        String originalName = file.getOriginalFilename();
-        String ext = "";
-        if (originalName != null && originalName.contains(".")) {
-            ext = originalName.substring(originalName.lastIndexOf("."));
-        }
-        String storedName = UUID.randomUUID().toString() + ext;
-
-        Path targetPath = uploadDir.resolve(storedName);
-        file.transferTo(targetPath.toFile());
+    public Attachment upload(MultipartFile file, Long clueId, Long reviewRecordId, String attachType, String userId) throws Exception {
+        String path = fileStorage.store(
+                file.getInputStream(),
+                file.getOriginalFilename(),
+                file.getContentType(),
+                attachType);
 
         Attachment attachment = Attachment.builder()
                 .clueId(clueId)
                 .reviewRecordId(reviewRecordId)
                 .attachType(attachType)
-                .originalName(originalName)
-                .storedName(storedName)
-                .filePath(targetPath.toString())
+                .originalName(file.getOriginalFilename())
+                .storedName(path)
+                .filePath(path)
                 .fileSize(file.getSize())
                 .createdBy(userId)
                 .updatedBy(userId)
@@ -70,11 +56,39 @@ public class FileService {
     }
 
     /**
-     * 获取附件文件路径
+     * 根据附件 ID 获取附件元数据
      */
-    public Path getAttachmentFile(Long attachmentId) {
-        Attachment attachment = attachmentRepository.findById(attachmentId)
+    public Attachment getById(Long attachmentId) {
+        return attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("附件不存在"));
-        return Paths.get(attachment.getFilePath());
+    }
+
+    /**
+     * 读取附件文件流
+     */
+    public AttachmentStream getStream(Long attachmentId) throws Exception {
+        Attachment attachment = getById(attachmentId);
+        return new AttachmentStream(
+                fileStorage.load(attachment.getFilePath()),
+                attachment.getOriginalName());
+    }
+
+    /**
+     * 删除附件
+     */
+    public void deleteAttachment(Long attachmentId) throws Exception {
+        Attachment attachment = getById(attachmentId);
+        fileStorage.delete(attachment.getFilePath());
+        attachmentRepository.deleteById(attachmentId);
+    }
+
+    public static class AttachmentStream {
+        public final java.io.InputStream stream;
+        public final String name;
+
+        public AttachmentStream(java.io.InputStream stream, String name) {
+            this.stream = stream;
+            this.name = name;
+        }
     }
 }

@@ -23,9 +23,17 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
 
-# 文件上传存储路径
+# 应用配置
 app:
+  # 文件存储类型：local=本地文件系统，minio=MinIO 对象存储
+  storage-type: local
   upload-path: E:/AI/claudeWork/clue-hub/backend/uploads
+  # MinIO 配置（仅 storage-type=minio 时生效）
+  minio:
+    endpoint:
+    access-key:
+    secret-key:
+    bucket: clue-hub
   # 企微配置（待替换为实际值）
   wecom:
     corp-id: your_corp_id
