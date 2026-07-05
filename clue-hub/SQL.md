@@ -99,28 +99,3 @@ CREATE TABLE IF NOT EXISTS review_record (
   KEY idx_clue_id (clue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='审核记录表';
 ```
-
-## 4. 增量升级（已有数据库）
-
-```sql
--- v1.3 新增审计字段
-ALTER TABLE clue ADD COLUMN created_at DATETIME DEFAULT NULL COMMENT '创建时间' AFTER ipd_approved_at;
-ALTER TABLE clue ADD COLUMN created_by VARCHAR(64) DEFAULT NULL COMMENT '创建人' AFTER created_at;
-ALTER TABLE clue ADD COLUMN updated_by VARCHAR(64) DEFAULT NULL COMMENT '更新人' AFTER created_by;
-
-ALTER TABLE attachment ADD COLUMN created_at DATETIME DEFAULT NULL COMMENT '创建时间' AFTER uploaded_at;
-ALTER TABLE attachment ADD COLUMN created_by VARCHAR(64) DEFAULT NULL COMMENT '创建人' AFTER created_at;
-ALTER TABLE attachment ADD COLUMN updated_at DATETIME DEFAULT NULL COMMENT '更新时间' AFTER created_by;
-ALTER TABLE attachment ADD COLUMN updated_by VARCHAR(64) DEFAULT NULL COMMENT '更新人' AFTER updated_at;
-
-ALTER TABLE review_record ADD COLUMN created_at DATETIME DEFAULT NULL COMMENT '创建时间' AFTER reviewed_at;
-ALTER TABLE review_record ADD COLUMN created_by VARCHAR(64) DEFAULT NULL COMMENT '创建人' AFTER created_at;
-ALTER TABLE review_record ADD COLUMN updated_at DATETIME DEFAULT NULL COMMENT '更新时间' AFTER created_by;
-ALTER TABLE review_record ADD COLUMN updated_by VARCHAR(64) DEFAULT NULL COMMENT '更新人' AFTER updated_at;
-
--- v1.3 废弃草稿表（草稿功能已迁移到 clue 表，status='new' 表示暂存）
--- DROP TABLE IF EXISTS clue_draft;
-
--- v1.2 新增 IPD 立项时间字段
--- ALTER TABLE clue ADD COLUMN ipd_approved_at DATETIME DEFAULT NULL COMMENT 'IPD立项时间' AFTER updated_at;
-```
