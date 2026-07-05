@@ -40,7 +40,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  if (to.path.startsWith('/admin') && !userStore.admin) {
+  if (to.path.startsWith('/admin') && userStore.loaded && !userStore.admin) {
     return '/'
   }
 })

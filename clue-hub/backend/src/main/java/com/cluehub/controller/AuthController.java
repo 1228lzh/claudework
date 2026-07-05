@@ -91,6 +91,7 @@ public class AuthController {
             user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
             user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
             user.setAdmin(isAdminUser(user.getUserId()));
+            log.info("User {} logged in, admin={}", user.getUserId(), user.isAdmin());
             session.setAttribute(SESSION_USER_KEY, user);
             sessionRegistry.register(accessToken, session);
             response.sendRedirect("/");
