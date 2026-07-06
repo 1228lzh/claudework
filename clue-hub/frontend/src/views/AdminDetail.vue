@@ -167,7 +167,7 @@ const actionLabels = { pass: '通过', reject: '不通过', return: '退回补�
 
 function stageLabel(s) { return stageLabels[s] || s }
 function actionLabel(a) { return actionLabels[a] || a }
-function formatDate(d) { return d ? new Date(d).toLocaleString('zh-CN') : '' }
+function formatDate(d) { return d ? new Date(d).toLocaleDateString('zh-CN') : '' }
 function formatSize(bytes) {
   if (!bytes) return '0 B'
   const u = ['B', 'KB', 'MB', 'GB']
