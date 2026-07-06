@@ -102,13 +102,9 @@
         </div>
       </van-cell-group>
 
-      <van-cell-group v-if="!isEditable && hasSupplementInfo" title="补充信息">
-        <div class="desc-textarea-wrapper">
-          <textarea :model-value="form.supplementInfo" class="desc-textarea" rows="5" readonly />
-        </div>
-      </van-cell-group>
-      <div style="background:yellow;padding:8px;font-size:12px;margin:8px 16px;">
-        调试: 补充信息 = "{{ form.supplementInfo }}", isEditable = {{ isEditable }}, has = {{ hasSupplementInfo }}
+      <div v-if="!isEditable && hasSupplementInfo" style="padding: 16px; background: #fff; margin: 8px 0;">
+        <div style="font-size: 14px; font-weight: 500; color: #323233; margin-bottom: 8px;">补充信息</div>
+        <div style="background: #f7f8fa; border-radius: 8px; padding: 12px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">{{ form.supplementInfo }}</div>
       </div>
 
       <!-- 附件 -->
