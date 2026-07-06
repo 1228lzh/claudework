@@ -107,7 +107,9 @@
           <textarea :model-value="form.supplementInfo" class="desc-textarea" rows="5" readonly />
         </div>
       </van-cell-group>
-      <!-- DEBUG: 补充信息={{ form.supplementInfo }} isEditable={{ isEditable }} has={{ hasSupplementInfo }} -->
+      <div style="background:yellow;padding:8px;font-size:12px;margin:8px 16px;">
+        调试: 补充信息 = "{{ form.supplementInfo }}", isEditable = {{ isEditable }}, has = {{ hasSupplementInfo }}
+      </div>
 
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
