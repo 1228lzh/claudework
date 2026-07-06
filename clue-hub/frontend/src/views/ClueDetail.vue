@@ -24,8 +24,8 @@
         <div v-if="isEditable" class="desc-hint">说清楚"发现了什么"+"为什么觉得这是个机会"即可</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.clueDesc" class="desc-textarea" rows="5"
-            :placeholder="isEditable ? '请输入' : ''" maxlength="500" :readonly="!isEditable" />
-          <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
+            :placeholder="isEditable ? '请输入' : ''" maxlength="3000" :readonly="!isEditable" />
+          <div class="desc-count">{{ (form.clueDesc || '').length }} / 3000</div>
         </div>
       </van-cell-group>
 
@@ -67,7 +67,7 @@
         <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
         <van-field v-model="form.urgency" label="时间紧迫度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showUrgencyPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
         <van-field v-model="form.productStatus" label="竞品情况" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showProductStatusPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
-        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家竞品" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
+        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪些竞品" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
         <van-field v-if="clue.ipdApprovedAt" label="上市时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>
 
@@ -88,8 +88,8 @@
         <div class="field-label">补充信息 <span style="color: #ee0a24;">*</span></div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.supplementInfo" class="desc-textarea" rows="5"
-            placeholder="请根据审核意见补充所需信息" maxlength="500" />
-          <div class="desc-count">{{ (form.supplementInfo || '').length }} / 500</div>
+            placeholder="请根据审核意见补充所需信息" maxlength="3000" />
+          <div class="desc-count">{{ (form.supplementInfo || '').length }} / 3000</div>
         </div>
         <div class="field-label">补充附件 <span class="optional-hint">（选填）</span></div>
         <div class="upload-wrapper">

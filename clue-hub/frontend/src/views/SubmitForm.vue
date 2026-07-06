@@ -9,7 +9,7 @@
       <van-step>什么线索</van-step>
       <van-step>线索来源</van-step>
       <van-step>线索判断</van-step>
-      <van-step>补充材料</van-step>
+      <van-step>上传材料</van-step>
     </van-steps>
 
     <!-- 表单内容 -->
@@ -24,16 +24,17 @@
 
       <!-- 第二步：什么线索 -->
       <template v-if="currentStep === 1">
-        <van-field v-model="form.clueName" label="线索名称" placeholder="一句话描述，不超过50字" maxlength="50" required
+        <van-field v-model="form.clueName" label="线索名称" placeholder='例："某代理商自己在做包管包柱，投入不大有利润"' maxlength="50" required
           :rules="[{ required: true, message: '请填写线索名称' }]" />
         <van-field v-model="form.clueType" label="线索类型" is-link readonly @click="showClueTypePicker = true" required
           placeholder="请选择线索类型" :rules="[{ required: true }]" />
         <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" placeholder="请说明" />
         <div class="field-label required">线索描述</div>
+        <div class="desc-hint">说清楚"发现了什么"+"为什么觉得这是个机会"即可</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.clueDesc" class="desc-textarea" rows="6"
-            placeholder="3-5句话说明：是什么 + 为什么是机会" maxlength="500" />
-          <div class="desc-count">{{ form.clueDesc.length }} / 500</div>
+            placeholder="请输入" maxlength="3000" />
+          <div class="desc-count">{{ form.clueDesc.length }} / 3000</div>
         </div>
       </template>
 
@@ -50,9 +51,10 @@
         <van-field v-model="form.reliability" label="信息可靠度" is-link readonly required
           @click="showReliabilityPicker = true" placeholder="请选择" />
         <div class="field-label required">预计市场规模</div>
+        <div class="desc-hint">请描述预计市场规模、增长趋势及相关数据</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.marketSize" class="desc-textarea" rows="6"
-            placeholder="请描述预计市场规模、增长趋势及相关数据" maxlength="500" />
+            placeholder="请输入" maxlength="500" />
           <div class="desc-count">{{ form.marketSize.length }} / 500</div>
         </div>
       </template>
@@ -65,7 +67,7 @@
             {{ item }}
           </van-checkbox>
         </van-checkbox-group>
-        <van-field v-if="form.productLinesArr.includes('全新品类（具体）')" v-model="form.productLinesDetail" label="具体品类" placeholder="请说明具体品类" />
+        <van-field v-if="form.productLinesArr.includes('全新品类（具体）') || form.productLinesArr.includes('其他')" v-model="form.productLinesDetail" label="具体品类" placeholder="请说明具体品类" />
 
         <div class="field-label">目标客户群体（可多选）</div>
         <van-checkbox-group v-model="form.targetCustomersArr" direction="horizontal">
@@ -79,7 +81,7 @@
           placeholder="请选择" />
         <van-field v-model="form.productStatus" label="竞品情况" is-link readonly @click="showProductStatusPicker = true"
           placeholder="请选择" />
-        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" placeholder="请说明具体竞品" />
+        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪些竞品" placeholder="请说明具体竞品" />
       </template>
 
       <!-- 第五步：补充材料 -->
@@ -91,6 +93,16 @@
           </van-checkbox>
         </van-checkbox-group>
 
+        <van-field v-if="form.supplementMaterialTypesArr.includes('其他')" v-model="form.supplementMaterialOther" label="其他材料" placeholder="请说明" />
+        <!-- 已有附件 -->
+        <div v-if="existingAttachments.length" class="existing-files">
+          <div class="field-label">已有附件</div>
+          <div v-for="att in existingAttachments" :key="att.id" class="existing-file-item" @click="window.open(getFileUrl(att.id), '_blank')">
+            <van-icon name="description" />
+            <span class="file-name">{{ att.originalName }}</span>
+            <span class="file-size">{{ formatSize(att.fileSize) }}</span>
+          </div>
+        </div>
         <div class="upload-section">
           <div class="field-label">上传附件（不限制格式和大小）</div>
           <van-uploader :after-read="onFileRead" multiple :max-count="10"
@@ -139,7 +151,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { submitClue, saveClue, getPending, getClueDetail, uploadClueFile } from '../api'
+import { submitClue, saveClue, getPending, getClueDetail, uploadClueFile, getClueAttachments, getFileUrl } from '../api'
 import { showConfirmDialog } from 'vant'
 import { userStore } from '../stores/user.js'
 
@@ -174,15 +186,16 @@ const form = reactive({
   productStatusDetail: '',
   // 第五步
   supplementMaterialTypesArr: [],
+  supplementMaterialOther: '',
   // 草稿
   draftId: null
 })
 
 // 选择项配置
-const clueTypeOptions = ['新产品/新规格需求', '现有产品改进/升级需求', '新应用场景/新领域机会', '竞品新动作/竞品威胁', '政策/标准/法规变化带来的机会', '技术/材料/工艺突破带来的机会', '其他']
+const clueTypeOptions = ['新产品/新规格需求', '新应用场景/新领域机会', '竞品新动作/竞品威胁', '政策/标准/法规变化带来的机会', '技术/材料/工艺突破带来的机会', '其他']
 const infoSourceOptions = ['客户/业主直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '安装公司/施工方反馈', '销售同事反馈', '行业展会/论坛/会议', '竞品观察/竞品情报', '行业媒体/行业报告', '政策/标准/法规文件', '内部市场侦察小组', '其他']
 const reliabilityOptions = ['高——多个独立来源交叉验证', '中——单一可靠来源（如重点客户直接反馈）', '低——道听途说/单次偶然获取']
-const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '配件/接头类', '全新品类（具体）']
+const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '全新品类（具体）', '其他']
 const customerOptions = ['房地产开发商', '市政工程', '设计院', '安装公司', '经销商', '家装用户', '工业用户', '其他']
 const urgencyOptions = ['紧急——窗口期很短（3个月内需要响应）', '较急——半年内应该行动', '不急——可以从容评估（1年以上窗口期）', '不确定']
 const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
@@ -202,6 +215,8 @@ const productStatusActions = productStatusOptions.map(v => ({ name: v }))
 
 // 待上传文件列表（提交时一起上传）
 const pendingFiles = ref([])
+// 已有附件列表（编辑时加载）
+const existingAttachments = ref([])
 
 // 选择器事件
 const onSelectClueType = ({ name }) => {
@@ -241,6 +256,9 @@ onMounted(async () => {
         loadClueIntoForm(clueData.data)
         showMyToast('正在编辑线索')
       }
+      // 加载已有附件
+      const { data: attData } = await getClueAttachments(editId)
+      if (attData.code === 0) existingAttachments.value = attData.data || []
     } catch (e) { /* ignore */ }
     loadWecomUserInfo()
     return
@@ -280,6 +298,7 @@ function loadClueIntoForm(clue) {
   form.productStatus = clue.productStatus || ''
   form.productStatusDetail = clue.productStatusDetail || ''
   if (clue.supplementMaterialTypes) form.supplementMaterialTypesArr = clue.supplementMaterialTypes.split(',')
+  form.supplementMaterialOther = clue.supplementMaterialOther || ''
 }
 
 function loadWecomUserInfo() {
@@ -383,6 +402,7 @@ function buildPayload() {
     productLines: form.productLinesArr.join(','),
     targetCustomers: form.targetCustomersArr.join(','),
     supplementMaterialTypes: form.supplementMaterialTypesArr.join(','),
+    supplementMaterialOther: form.supplementMaterialOther,
     action: 'submit'
   }
 }
@@ -476,7 +496,7 @@ function formatSize(bytes) {
   padding: 12px 16px 8px;
   font-size: 14px;
   color: #323233;
-  font-weight: 500;
+  font-weight: 600;
 }
 .field-label.required::before {
   content: '* ';
@@ -523,6 +543,31 @@ function formatSize(bytes) {
   cursor: pointer;
 }
 
+.existing-files {
+  padding: 8px 16px;
+}
+.existing-file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f7f8fa;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+.existing-file-item .file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.existing-file-item .file-size {
+  color: #999;
+  font-size: 12px;
+}
+
 .desc-textarea-wrapper {
   margin: 0 16px;
   border: 1px solid #ebedf0;
@@ -552,7 +597,16 @@ function formatSize(bytes) {
   color: #999;
   background: #fff;
 }
+.desc-hint {
+  padding: 0 16px 8px;
+  font-size: 12px;
+  color: #999;
+}
 .readonly-field :deep(.van-field__control) {
   color: #999;
+}
+
+:deep(.van-field__label) {
+  font-weight: 600;
 }
 </style>

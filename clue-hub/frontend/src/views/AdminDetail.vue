@@ -17,7 +17,7 @@
         <div class="field-label">线索描述</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.clueDesc" class="desc-textarea" rows="5" readonly />
-          <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
+          <div class="desc-count">{{ (form.clueDesc || '').length }} / 3000</div>
         </div>
       </van-cell-group>
 
@@ -48,7 +48,7 @@
         <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" readonly />
         <van-field v-model="form.urgency" label="时间紧迫度" readonly />
         <van-field v-model="form.productStatus" label="竞品情况" readonly />
-        <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家竞品" readonly />
+        <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪些竞品" readonly />
       </van-cell-group>
 
       <!-- 补充材料类型 -->
