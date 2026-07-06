@@ -93,7 +93,9 @@ public class ClueService {
         }
 
         fillClueFields(clue, dto);
-        clue.setStatus("new");
+        if (clue.getStatus() == null) {
+            clue.setStatus("new");
+        }
         clue.setUpdatedBy(dto.getWecomUserId());
         return clueRepository.save(clue);
     }
@@ -123,6 +125,8 @@ public class ClueService {
         clue.setUrgency(dto.getUrgency());
         clue.setProductStatus(dto.getProductStatus());
         clue.setProductStatusDetail(dto.getProductStatusDetail());
+        clue.setSupplementInfo(dto.getSupplementInfo());
+        clue.setSupplementMaterialTypes(dto.getSupplementMaterialTypes());
     }
 
     /** 管理端：活跃审核中的线索 */
@@ -155,6 +159,8 @@ public class ClueService {
         clue.setReporterName(dto.getReporterName());
         clue.setReporterDept(dto.getReporterDept());
         clue.setReporterContact(dto.getReporterContact());
+        clue.setSupplementInfo(dto.getSupplementInfo());
+        clue.setSupplementMaterialTypes(dto.getSupplementMaterialTypes());
         clue.setStatus("initial_screening");
         clue.setSubmittedAt(LocalDateTime.now());
         clue.setUpdatedBy(dto.getWecomUserId());
