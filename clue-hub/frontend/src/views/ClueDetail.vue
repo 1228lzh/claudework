@@ -102,11 +102,12 @@
         </div>
       </van-cell-group>
 
-      <van-cell-group v-if="!isEditable && form.supplementInfo" title="补充信息">
+      <van-cell-group v-if="!isEditable && hasSupplementInfo" title="补充信息">
         <div class="desc-textarea-wrapper">
           <textarea :model-value="form.supplementInfo" class="desc-textarea" rows="5" readonly />
         </div>
       </van-cell-group>
+      <!-- DEBUG: 补充信息={{ form.supplementInfo }} isEditable={{ isEditable }} has={{ hasSupplementInfo }} -->
 
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
@@ -146,7 +147,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue, uploadClueFile } from '../api'
 import { showConfirmDialog } from 'vant'
@@ -159,7 +160,7 @@ const attachments = ref([])
 const supplementFiles = ref([])
 const submitting = ref(false)
 
-const isEditable = computed(() => clue.value?.status === 'pending_supplement')
+const hasSupplementInfo = computed(() => !!form.supplementInfo)
 
 const form = reactive({
   reporterName: '', reporterDept: '', reporterContact: '',
@@ -246,6 +247,7 @@ function loadClueIntoForm(clueData) {
   form.productStatusDetail = clueData.productStatusDetail || ''
   if (clueData.supplementMaterialTypes) form.supplementMaterialTypesArr = clueData.supplementMaterialTypes.split(',')
   form.supplementInfo = clueData.supplementInfo || ''
+  console.log('loadClueIntoForm supplementInfo:', clueData.supplementInfo)
 }
 
 onMounted(async () => {
@@ -256,7 +258,9 @@ onMounted(async () => {
     ])
     if (clueRes.data.code === 0) {
       clue.value = clueRes.data.data
+      console.log('ClueDetail loaded:', clue.value.supplementInfo, 'status:', clue.value.status)
       loadClueIntoForm(clue.value)
+      await nextTick()
     }
     if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
