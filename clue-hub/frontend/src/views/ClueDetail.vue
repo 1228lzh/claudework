@@ -162,6 +162,7 @@ const attachments = ref([])
 const supplementFiles = ref([])
 const submitting = ref(false)
 
+const isEditable = computed(() => clue.value?.status === 'pending_supplement')
 const hasSupplementInfo = computed(() => !!form.supplementInfo)
 
 const form = reactive({
