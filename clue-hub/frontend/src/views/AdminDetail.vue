@@ -84,13 +84,9 @@
 
         <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
         <template v-if="clue.status === 'verifying'">
-          <van-field v-model="ipdApprovedDate" label="IPD立项时间" placeholder="请选择" is-link @click="showDatePicker('ipd')" />
-          <van-field v-model="completedDate" label="完结时间" placeholder="请选择" is-link @click="showDatePicker('completed')" />
+          <van-field v-model="ipdApprovedDate" label="IPD立项时间" type="date" placeholder="请选择" />
+          <van-field v-model="completedDate" label="完结时间" type="date" placeholder="请选择" />
         </template>
-        <van-popup v-model:show="showPicker" position="bottom" round>
-          <van-date-picker v-model="pickerDate" :min-date="minDate"
-            @confirm="onDateConfirm" @cancel="showPicker = false" />
-        </van-popup>
 
         <div class="action-buttons">
           <template v-if="clue.status === 'initial_screening'">
@@ -139,10 +135,8 @@ const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
 const completedDate = ref('')
-const showPicker = ref(false)
-const pickerDate = ref(new Date())
-const datePickerTarget = ref('')
-const minDate = new Date()
+const ipdApprovedDate = ref('')
+const completedDate = ref('')
 const pendingReviewFiles = ref([])
 
 const form = reactive({
@@ -182,24 +176,6 @@ watch(ipdApprovedDate, (val) => {
     completedDate.value = d.toISOString().split('T')[0]
   }
 })
-
-function showDatePicker(target) {
-  datePickerTarget.value = target
-  pickerDate.value = new Date()
-  showPicker.value = true
-}
-function onDateConfirm(date) {
-  const d = new Date(date)
-  const str = d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0')
-  if (datePickerTarget.value === 'ipd') {
-    ipdApprovedDate.value = str
-  } else {
-    completedDate.value = str
-  }
-  showPicker.value = false
-}
 
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
 
