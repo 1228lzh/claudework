@@ -41,6 +41,9 @@ CREATE TABLE IF NOT EXISTS clue (
   urgency         VARCHAR(100)    DEFAULT NULL             COMMENT '时间紧迫度',
   product_status  VARCHAR(100)    DEFAULT NULL             COMMENT '竞品情况',
   product_status_detail VARCHAR(200) DEFAULT NULL          COMMENT '竞品情况-哪家',
+  -- 补充信息
+  supplement_info  TEXT                                     COMMENT '补充信息（待补充状态下用户填写）',
+  supplement_material_types VARCHAR(500) DEFAULT NULL      COMMENT '补充材料类型，多个逗号分隔',
   -- 状态与时间
   status          VARCHAR(30)     DEFAULT NULL             COMMENT '状态: new/pending_supplement/initial_screening/judging/verifying/ipd_review/{stage}_rejected',
   submitted_at    DATETIME        DEFAULT NULL             COMMENT '提交时间',
