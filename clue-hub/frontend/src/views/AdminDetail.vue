@@ -49,13 +49,18 @@
         <van-field v-model="form.urgency" label="时间紧迫度" readonly />
         <van-field v-model="form.productStatus" label="竞品情况" readonly />
         <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家" readonly />
-        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>
 
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
         <van-cell v-for="att in attachments" :key="att.id" :title="att.originalName"
           :label="formatSize(att.fileSize)" is-link @click="downloadFile(att.id)" />
+      </van-cell-group>
+
+      <!-- 立项信息 -->
+      <van-cell-group v-if="clue.status === 'ipd_review' && (clue.ipdApprovedAt || clue.completedAt)" title="立项信息">
+        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
+        <van-field v-if="clue.completedAt" label="完结时间" :model-value="formatDate(clue.completedAt)" readonly />
       </van-cell-group>
 
       <!-- 审核历史 -->
