@@ -56,7 +56,7 @@ public class AuthController {
                          HttpSession session, HttpServletResponse response) throws IOException {
         if (stateStore.remove(state) == null) {
             log.warn("State invalid: {}", state);
-            response.sendRedirect("/auth/login");
+            response.sendRedirect(response.encodeRedirectURL("/auth/login"));
             return;
         }
         try {
@@ -94,10 +94,10 @@ public class AuthController {
             log.info("User {} logged in, admin={}", user.getUserId(), user.isAdmin());
             session.setAttribute(SESSION_USER_KEY, user);
             sessionRegistry.register(accessToken, session);
-            response.sendRedirect("/");
+            response.sendRedirect(response.encodeRedirectURL("/"));
         } catch (Exception e) {
             log.error("Feilian OAuth2 callback failed", e);
-            response.sendRedirect("/auth/error?reason=" + java.net.URLEncoder.encode(e.getMessage(), "UTF-8"));
+            response.sendRedirect(response.encodeRedirectURL("/auth/error?reason=" + java.net.URLEncoder.encode(e.getMessage(), "UTF-8")));
         }
     }
 

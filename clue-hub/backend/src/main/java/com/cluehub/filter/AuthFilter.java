@@ -44,6 +44,6 @@ public class AuthFilter implements Filter {
             }
         }
 
-        response.sendRedirect("/auth/login");
+        response.sendRedirect(response.encodeRedirectURL("/auth/login"));
     }
 }
