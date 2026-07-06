@@ -72,7 +72,7 @@
 
       <!-- 审核操作区 -->
       <div v-if="canReview" class="review-actions safe-bottom">
-        <van-field v-model="reviewComment" type="textarea" rows="3" placeholder="审核意见（选填）"
+        <van-field v-model="reviewComment" type="textarea" rows="3" placeholder="审核意见（退回/不通过时必填）"
           show-word-limit maxlength="500" />
 
         <!-- 审核附件上传 -->
@@ -197,10 +197,15 @@ onMounted(async () => {
 })
 
 async function doReview(action) {
+  const comment = reviewComment.value.trim()
+  if ((action === 'reject' || action === 'return') && !comment) {
+    showMyToast('请填写审核意见')
+    return
+  }
   try {
     const { data } = await submitReview(clue.value.id, {
       action,
-      comment: reviewComment.value,
+      comment: comment || '通过',
       reviewerName: userStore.fullname || '审核员'
     })
     if (data.code === 0) {
