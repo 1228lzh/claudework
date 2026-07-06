@@ -51,6 +51,21 @@
         <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家" readonly />
       </van-cell-group>
 
+      <!-- 补充材料类型 -->
+      <van-cell-group title="补充材料">
+        <div class="field-label">如有以下材料，请附上：</div>
+        <div class="cb-group">
+          <span v-for="item in supplementMaterialOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.supplementMaterialTypesArr.includes(item) }]">{{ item }}</span>
+        </div>
+      </van-cell-group>
+
+      <!-- 补充信息 -->
+      <van-cell-group v-if="form.supplementInfo" title="补充信息">
+        <div class="desc-textarea-wrapper">
+          <textarea :model-value="form.supplementInfo" class="desc-textarea" rows="5" readonly />
+        </div>
+      </van-cell-group>
+
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
         <van-cell v-for="att in attachments" :key="att.id" :title="att.originalName"
@@ -83,7 +98,7 @@
         <!-- 审核附件上传 -->
         <div class="review-upload">
           <van-uploader :after-read="onReviewFileRead" multiple :max-count="5"
-            accept="*" upload-icon="plus"
+            accept="*" upload-icon="plus" result-type="file"
             @delete="onReviewFileDelete" />
         </div>
 
@@ -153,12 +168,14 @@ const form = reactive({
   clueName: '', clueType: '', clueTypeOther: '', clueDesc: '',
   infoSourceArr: [], infoSourceOther: '', reliability: '', marketSize: '',
   productLinesArr: [], productLinesDetail: '', targetCustomersArr: [], targetCustomersOther: '',
-  urgency: '', productStatus: '', productStatusDetail: ''
+  urgency: '', productStatus: '', productStatusDetail: '',
+  supplementMaterialTypesArr: [], supplementInfo: ''
 })
 
 const infoSourceOptions = ['客户/业务直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '装修公司/施工方反馈', '行业同事反馈', '行业展会/论坛/交流', '产品观察/产品情报', '行业媒体/行业报告', '政策/标准/法规文件', '其他']
 const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃气管道', '新风管道', '净水/水处理', '全品类']
 const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
+const supplementMaterialOptions = ['客户需求原始记录/邮件/聊天截图', '竞品产品照片/资料', '行业报告/政策文件', '相关技术资料', '其他']
 
 const stageLabels = {
   initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项'
@@ -207,6 +224,8 @@ function loadClueIntoForm(clueData) {
   form.urgency = clueData.urgency || ''
   form.productStatus = clueData.productStatus || ''
   form.productStatusDetail = clueData.productStatusDetail || ''
+  if (clueData.supplementMaterialTypes) form.supplementMaterialTypesArr = clueData.supplementMaterialTypes.split(',')
+  form.supplementInfo = clueData.supplementInfo || ''
 }
 
 onMounted(async () => {
