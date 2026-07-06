@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS clue (
   submitted_at    DATETIME        DEFAULT NULL             COMMENT '提交时间',
   updated_at      DATETIME        DEFAULT NULL             COMMENT '更新时间',
   ipd_approved_at DATETIME        DEFAULT NULL             COMMENT 'IPD立项时间',
+  completed_at    DATETIME        DEFAULT NULL             COMMENT '完结时间',
   -- 审计字段
   created_at      DATETIME        DEFAULT NULL             COMMENT '创建时间',
   created_by      VARCHAR(64)     DEFAULT NULL             COMMENT '创建人（飞连 user_id）',

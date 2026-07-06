@@ -127,6 +127,9 @@ public class Clue {
     /** IPD立项时间 */
     private LocalDateTime ipdApprovedAt;
 
+    /** 完结时间 */
+    private LocalDateTime completedAt;
+
     // ===== 审计字段 =====
     @Column(length = 64)
     private String createdBy;

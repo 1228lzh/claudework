@@ -82,6 +82,12 @@
             @delete="onReviewFileDelete" />
         </div>
 
+        <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
+        <template v-if="clue.status === 'verifying'">
+          <van-field v-model="ipdApprovedDate" label="IPD立项时间" type="date" placeholder="请选择" />
+          <van-field v-model="completedDate" label="完结时间" type="date" placeholder="请选择" />
+        </template>
+
         <div class="action-buttons">
           <template v-if="clue.status === 'initial_screening'">
             <van-button type="danger" plain @click="doReview('reject')">不通过</van-button>
@@ -104,7 +110,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl } from '../api'
 import { userStore } from '../stores/user.js'
@@ -127,6 +133,8 @@ const clue = ref(null)
 const reviewHistory = ref([])
 const attachments = ref([])
 const reviewComment = ref('')
+const ipdApprovedDate = ref('')
+const completedDate = ref('')
 const pendingReviewFiles = ref([])
 
 const form = reactive({
@@ -158,6 +166,15 @@ function formatSize(bytes) {
 }
 
 const reviewableStatuses = ['initial_screening', 'judging', 'verifying']
+// IPD立项时间变更时，自动设置完结时间为三年后
+watch(ipdApprovedDate, (val) => {
+  if (val) {
+    const d = new Date(val)
+    d.setFullYear(d.getFullYear() + 3)
+    completedDate.value = d.toISOString().split('T')[0]
+  }
+})
+
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
 
 function loadClueIntoForm(clueData) {
@@ -206,7 +223,9 @@ async function doReview(action) {
     const { data } = await submitReview(clue.value.id, {
       action,
       comment: comment || '通过',
-      reviewerName: userStore.fullname || '审核员'
+      reviewerName: userStore.fullname || '审核员',
+      ipdApprovedAt: ipdApprovedDate.value ? ipdApprovedDate.value + 'T00:00:00' : null,
+      completedAt: completedDate.value ? completedDate.value + 'T00:00:00' : null
     })
     if (data.code === 0) {
       // 上传审核附件

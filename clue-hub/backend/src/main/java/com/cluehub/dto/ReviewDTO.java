@@ -16,4 +16,10 @@ public class ReviewDTO {
 
     /** 审核人姓名 */
     private String reviewerName;
+
+    /** IPD立项时间（验证通过时填写） */
+    private String ipdApprovedAt;
+
+    /** 完结时间（验证通过时填写） */
+    private String completedAt;
 }

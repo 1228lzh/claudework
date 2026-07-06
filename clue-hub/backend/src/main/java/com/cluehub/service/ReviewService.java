@@ -64,7 +64,12 @@ public class ReviewService {
             String nextStage = getNextStage(currentStatus);
             clue.setStatus(nextStage);
             if ("ipd_review".equals(nextStage)) {
-                clue.setIpdApprovedAt(LocalDateTime.now());
+                if (dto.getIpdApprovedAt() != null && !dto.getIpdApprovedAt().isEmpty()) {
+                    clue.setIpdApprovedAt(LocalDateTime.parse(dto.getIpdApprovedAt()));
+                }
+                if (dto.getCompletedAt() != null && !dto.getCompletedAt().isEmpty()) {
+                    clue.setCompletedAt(LocalDateTime.parse(dto.getCompletedAt()));
+                }
             }
         } else {
             throw new RuntimeException("未知操作：" + action);
