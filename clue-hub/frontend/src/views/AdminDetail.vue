@@ -103,7 +103,7 @@
         <!-- 审核附件上传 -->
         <div class="review-upload">
           <van-uploader v-model="pendingReviewFiles" multiple :max-count="5"
-            accept="*" upload-icon="plus" result-type="file" />
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx" upload-icon="plus" result-type="file" />
         </div>
 
         <!-- IPD立项通过时填写上市时间和完结时间 -->
