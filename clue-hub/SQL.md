@@ -12,10 +12,10 @@ CREATE DATABASE IF NOT EXISTS clue_hub
 USE clue_hub;
 ```
 
-## 1. 线索表 (clue)
+## 1. 线索表 (hub_clue)
 
 ```sql
-CREATE TABLE IF NOT EXISTS clue (
+CREATE TABLE IF NOT EXISTS hub_clue (
   id              BIGINT          NOT NULL AUTO_INCREMENT  COMMENT '主键',
   clue_no         VARCHAR(20)     NOT NULL                 COMMENT '线索编号，如 CL202607030001',
   -- 第一步：谁报的
@@ -59,10 +59,10 @@ CREATE TABLE IF NOT EXISTS clue (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='线索提报表';
 ```
 
-## 2. 附件表 (attachment)
+## 2. 附件表 (hub_attachment)
 
 ```sql
-CREATE TABLE IF NOT EXISTS attachment (
+CREATE TABLE IF NOT EXISTS hub_attachment (
   id              BIGINT          NOT NULL AUTO_INCREMENT  COMMENT '主键',
   clue_id         BIGINT          DEFAULT NULL             COMMENT '关联线索ID',
   review_record_id BIGINT         DEFAULT NULL             COMMENT '关联审核记录ID',
@@ -83,10 +83,10 @@ CREATE TABLE IF NOT EXISTS attachment (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='附件表';
 ```
 
-## 3. 审核记录表 (review_record)
+## 3. 审核记录表 (hub_review_record)
 
 ```sql
-CREATE TABLE IF NOT EXISTS review_record (
+CREATE TABLE IF NOT EXISTS hub_review_record (
   id              BIGINT          NOT NULL AUTO_INCREMENT  COMMENT '主键',
   clue_id         BIGINT          NOT NULL                 COMMENT '关联线索ID',
   review_stage    VARCHAR(30)     DEFAULT NULL             COMMENT '审核阶段: initial_screening/judging/verifying/ipd_review',

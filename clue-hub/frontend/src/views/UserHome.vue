@@ -52,7 +52,7 @@
         </div>
         <div class="profile-info">
           <div class="name">{{ userStore.fullname || '未设置' }}</div>
-          <div class="contact">{{ userStore.mobile || '未知联系方式' }}</div>
+          <div class="contact">工号：{{ userStore.userId || '未知' }}</div>
         </div>
       </div>
 

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * 审核记录
  */
 @Entity
-@Table(name = "review_record")
+@Table(name = "hub_review_record")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

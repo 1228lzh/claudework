@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * 附件
  */
 @Entity
-@Table(name = "attachment")
+@Table(name = "hub_attachment")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

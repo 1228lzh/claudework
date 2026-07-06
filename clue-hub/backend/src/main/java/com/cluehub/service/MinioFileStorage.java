@@ -60,7 +60,7 @@ public class MinioFileStorage implements FileStorage {
         if (originalName != null && originalName.contains(".")) {
             ext = originalName.substring(originalName.lastIndexOf("."));
         }
-        String objectName = attachType + "/" + UUID.randomUUID().toString() + ext;
+        String objectName = "clueHub/" + attachType + "/" + UUID.randomUUID().toString() + ext;
 
         client.putObject(PutObjectArgs.builder()
                 .bucket(bucket)

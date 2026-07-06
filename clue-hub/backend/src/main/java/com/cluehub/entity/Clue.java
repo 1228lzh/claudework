@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * 线索提报表
  */
 @Entity
-@Table(name = "clue")
+@Table(name = "hub_clue")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -102,6 +102,15 @@ public class Clue {
     /** 竞品情况-哪家 */
     @Column(length = 200)
     private String productStatusDetail;
+
+    // ===== 补充信息 =====
+    /** 补充信息（待补充状态下用户填写） */
+    @Column(columnDefinition = "TEXT")
+    private String supplementInfo;
+
+    /** 补充材料类型，多个用逗号分隔 */
+    @Column(length = 500)
+    private String supplementMaterialTypes;
 
     // ===== 状态与审核 =====
     /**

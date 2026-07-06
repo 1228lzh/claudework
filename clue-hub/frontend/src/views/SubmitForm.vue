@@ -77,13 +77,20 @@
 
         <van-field v-model="form.urgency" label="时间紧迫度" is-link readonly @click="showUrgencyPicker = true"
           placeholder="请选择" />
-        <van-field v-model="form.productStatus" label="竞品情况（选填）" is-link readonly @click="showProductStatusPicker = true"
+        <van-field v-model="form.productStatus" label="竞品情况" is-link readonly @click="showProductStatusPicker = true"
           placeholder="请选择" />
         <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" placeholder="请说明具体竞品" />
       </template>
 
       <!-- 第五步：补充材料 -->
       <template v-if="currentStep === 4">
+        <div class="field-label required">如有以下材料，请附上：（可多选）</div>
+        <van-checkbox-group v-model="form.supplementMaterialTypesArr" direction="horizontal">
+          <van-checkbox v-for="item in supplementMaterialOptions" :key="item" :name="item" shape="square">
+            {{ item }}
+          </van-checkbox>
+        </van-checkbox-group>
+
         <div class="upload-section">
           <div class="field-label">上传附件（不限制格式和大小）</div>
           <van-uploader :after-read="onFileRead" multiple :max-count="10"
@@ -165,6 +172,8 @@ const form = reactive({
   urgency: '',
   productStatus: '',
   productStatusDetail: '',
+  // 第五步
+  supplementMaterialTypesArr: [],
   // 草稿
   draftId: null
 })
@@ -177,6 +186,7 @@ const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃
 const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
 const urgencyOptions = ['紧迫（窗口期很短，3个月内需要响应）', '较急（建议尽快关注和行动）', '从容（可从容调研，1年以上窗口期）', '不确定']
 const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
+const supplementMaterialOptions = ['客户需求原始记录/邮件/聊天截图', '竞品产品照片/资料', '行业报告/政策文件', '相关技术资料', '其他']
 
 // 弹窗状态
 const showClueTypePicker = ref(false)
@@ -269,6 +279,7 @@ function loadClueIntoForm(clue) {
   form.urgency = clue.urgency || ''
   form.productStatus = clue.productStatus || ''
   form.productStatusDetail = clue.productStatusDetail || ''
+  if (clue.supplementMaterialTypes) form.supplementMaterialTypesArr = clue.supplementMaterialTypes.split(',')
 }
 
 function loadWecomUserInfo() {
@@ -299,6 +310,10 @@ function validateStep(step) {
       break
     case 3:
       // 非必填
+      break
+    case 4:
+      if (!form.supplementMaterialTypesArr.length) { showMyToast('请至少选择一项补充材料类型'); return false }
+      if (!pendingFiles.value.length) { showMyToast('请至少上传一个附件'); return false }
       break
   }
   return true
@@ -367,6 +382,7 @@ function buildPayload() {
     infoSource: form.infoSourceArr.join(','),
     productLines: form.productLinesArr.join(','),
     targetCustomers: form.targetCustomersArr.join(','),
+    supplementMaterialTypes: form.supplementMaterialTypesArr.join(','),
     action: 'submit'
   }
 }
@@ -401,6 +417,7 @@ async function uploadFiles(clueId) {
 
 // 提交
 async function onSubmit() {
+  if (!validateStep(currentStep.value)) return
   submitting.value = true
   try {
     form.wecomUserId = userStore.userId

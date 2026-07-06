@@ -4,6 +4,7 @@ import com.cluehub.dto.ClueSubmitDTO;
 import com.cluehub.entity.Clue;
 import com.cluehub.repository.ClueRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClueService {
@@ -35,6 +37,7 @@ public class ClueService {
      */
     @Transactional
     public Clue submit(ClueSubmitDTO dto) {
+        log.info("submit called: supplementInfo={}, supplementMaterialTypes={}", dto.getSupplementInfo(), dto.getSupplementMaterialTypes());
         Clue clue;
         if (dto.getDraftId() != null) {
             // 暂存线索提交：更新现有记录
@@ -55,7 +58,9 @@ public class ClueService {
         clue.setSubmittedAt(LocalDateTime.now());
         clue.setUpdatedBy(dto.getWecomUserId());
 
-        return clueRepository.save(clue);
+        clue = clueRepository.save(clue);
+        log.info("submit saved: id={}, supplementInfo={}", clue.getId(), clue.getSupplementInfo());
+        return clue;
     }
 
     public Optional<Clue> getById(Long id) {

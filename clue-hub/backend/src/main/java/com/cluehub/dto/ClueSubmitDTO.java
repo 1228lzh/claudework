@@ -40,6 +40,12 @@ public class ClueSubmitDTO {
     private String productStatus;
     private String productStatusDetail;
 
+    /** 补充信息（退回补充时填写） */
+    private String supplementInfo;
+
+    /** 补充材料类型，多个用逗号分隔 */
+    private String supplementMaterialTypes;
+
     /** 提交类型：submit=直接提交, draft=保存草稿 */
     private String action;
     /** 草稿记录ID（更新草稿时传入） */

@@ -64,7 +64,7 @@
         </div>
         <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
         <van-field v-model="form.urgency" label="时间紧迫度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showUrgencyPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
-        <van-field v-model="form.productStatus" label="竞品情况（选填）" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showProductStatusPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
+        <van-field v-model="form.productStatus" label="竞品情况" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showProductStatusPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
         <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
         <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>

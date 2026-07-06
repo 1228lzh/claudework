@@ -53,6 +53,7 @@ const tabs = [
 
 const statusMap = {
   new: '新建',
+  pending_supplement: '待补充',
   initial_screening: '初筛中',
   judging: '研判中',
   verifying: '验证中',

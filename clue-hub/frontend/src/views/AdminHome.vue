@@ -42,6 +42,7 @@
         </div>
         <div class="profile-info">
           <div class="name">{{ userStore.fullname || '审核员' }}</div>
+          <div class="dept">工号：{{ userStore.userId || '未知' }}</div>
         </div>
       </div>
 
