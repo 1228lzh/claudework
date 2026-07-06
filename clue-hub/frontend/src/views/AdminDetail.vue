@@ -84,10 +84,14 @@
 
         <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
         <template v-if="clue.status === 'verifying'">
-          <van-field v-model="ipdApprovedDate" label="IPD立项时间" placeholder="请选择" is-link readonly @click="openNativeDate('ipd')" />
-          <van-field v-model="completedDate" label="完结时间" placeholder="请选择" is-link readonly @click="openNativeDate('completed')" />
-          <input :ref="el => dateInputs.ipd = el" type="date" style="position:absolute;left:-9999px;opacity:0" @change="e => ipdApprovedDate = e.target.value" />
-          <input :ref="el => dateInputs.completed = el" type="date" style="position:absolute;left:-9999px;opacity:0" @change="e => completedDate = e.target.value" />
+          <div class="native-date-field">
+            <span class="native-date-label">IPD立项时间</span>
+            <input v-model="ipdApprovedDate" type="date" class="native-date-input" />
+          </div>
+          <div class="native-date-field">
+            <span class="native-date-label">完结时间</span>
+            <input v-model="completedDate" type="date" class="native-date-input" />
+          </div>
         </template>
 
         <div class="action-buttons">
@@ -137,7 +141,6 @@ const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
 const completedDate = ref('')
-const dateInputs = reactive({ ipd: null, completed: null })
 const pendingReviewFiles = ref([])
 
 const form = reactive({
@@ -177,10 +180,6 @@ watch(ipdApprovedDate, (val) => {
     completedDate.value = d.toISOString().split('T')[0]
   }
 })
-
-function openNativeDate(target) {
-  if (dateInputs[target]) dateInputs[target].showPicker()
-}
 
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
 
@@ -384,6 +383,16 @@ function downloadFile(attachmentId) {
   }
 }
 .review-upload { padding: 8px 0; }
+.native-date-field {
+  display: flex; align-items: center;
+  padding: 10px 16px; background: #fff;
+  border-bottom: 1px solid #ebedf0;
+}
+.native-date-label { width: 90px; font-size: 14px; color: #323233; flex-shrink: 0; }
+.native-date-input {
+  flex: 1; border: none; font-size: 14px; color: #323233;
+  background: transparent; outline: none; -webkit-appearance: none;
+}
 .action-buttons {
   display: flex; gap: 12px; margin-top: 12px;
 }
