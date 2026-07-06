@@ -87,7 +87,10 @@
           <van-field v-model="ipdApprovedDate" label="IPD立项时间" placeholder="请选择" is-link @click="showDatePicker('ipd')" />
           <van-field v-model="completedDate" label="完结时间" placeholder="请选择" is-link @click="showDatePicker('completed')" />
         </template>
-        <van-calendar v-model:show="showCalendar" :min-date="minDate" @confirm="onDateConfirm" />
+        <van-popup v-model:show="showPicker" position="bottom" round>
+          <van-datetime-picker v-model="pickerDate" type="date" :min-date="minDate"
+            @confirm="onDateConfirm" @cancel="showPicker = false" />
+        </van-popup>
 
         <div class="action-buttons">
           <template v-if="clue.status === 'initial_screening'">
@@ -136,7 +139,8 @@ const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
 const completedDate = ref('')
-const showCalendar = ref(false)
+const showPicker = ref(false)
+const pickerDate = ref(new Date())
 const datePickerTarget = ref('')
 const minDate = new Date()
 const pendingReviewFiles = ref([])
@@ -181,7 +185,8 @@ watch(ipdApprovedDate, (val) => {
 
 function showDatePicker(target) {
   datePickerTarget.value = target
-  showCalendar.value = true
+  pickerDate.value = new Date()
+  showPicker.value = true
 }
 function onDateConfirm(date) {
   const d = new Date(date)
@@ -193,7 +198,7 @@ function onDateConfirm(date) {
   } else {
     completedDate.value = str
   }
-  showCalendar.value = false
+  showPicker.value = false
 }
 
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
