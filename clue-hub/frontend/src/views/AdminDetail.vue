@@ -135,8 +135,6 @@ const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
 const completedDate = ref('')
-const ipdApprovedDate = ref('')
-const completedDate = ref('')
 const pendingReviewFiles = ref([])
 
 const form = reactive({
