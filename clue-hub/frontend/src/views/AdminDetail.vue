@@ -87,6 +87,11 @@
             <span class="review-time">{{ formatDate(record.reviewedAt) }}</span>
           </div>
           <div v-if="record.comment" class="review-comment">{{ record.comment }}</div>
+          <div v-if="reviewAttachments[record.id]" class="review-files">
+            <div v-for="att in reviewAttachments[record.id]" :key="att.id" class="review-file-item" @click="downloadFile(att.id)">
+              <van-icon name="description" /> {{ att.originalName }}
+            </div>
+          </div>
         </div>
       </van-cell-group>
 
@@ -97,7 +102,7 @@
 
         <!-- 审核附件上传 -->
         <div class="review-upload">
-          <van-uploader v-model:file-list="pendingReviewFiles" :after-read="onReviewFileRead" multiple :max-count="5"
+          <van-uploader v-model="pendingReviewFiles" multiple :max-count="5"
             accept="*" upload-icon="plus" result-type="file" />
         </div>
 
@@ -137,7 +142,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl } from '../api'
+import { getClueDetail, getReviewHistory, getClueAttachments, submitReview, uploadReviewFile, getFileUrl, getReviewAttachments } from '../api'
 import { userStore } from '../stores/user.js'
 
 let toastTimer = null
@@ -156,6 +161,7 @@ const router = useRouter()
 const route = useRoute()
 const clue = ref(null)
 const reviewHistory = ref([])
+const reviewAttachments = ref({})
 const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
@@ -237,7 +243,18 @@ onMounted(async () => {
       clue.value = clueRes.data.data
       loadClueIntoForm(clue.value)
     }
-    if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
+    if (historyRes.data.code === 0) {
+      reviewHistory.value = historyRes.data.data || []
+      // 加载审核附件
+      const raMap = {}
+      await Promise.all(reviewHistory.value.map(async (r) => {
+        try {
+          const { data: attData } = await getReviewAttachments(r.id)
+          if (attData.code === 0 && attData.data.length) raMap[r.id] = attData.data
+        } catch (e) { /* ignore */ }
+      }))
+      reviewAttachments.value = raMap
+    }
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
   } catch (e) { console.error('加载失败', e) }
 })
@@ -264,8 +281,9 @@ async function doReview(action) {
       // 上传审核附件
       if (pendingReviewFiles.value.length > 0 && data.data.id) {
         for (const f of pendingReviewFiles.value) {
-          await uploadReviewFile(data.data.id, f.file)
+          await uploadReviewFile(data.data.id, f.file || f)
         }
+        pendingReviewFiles.value = []
       }
       showMyToast('操作成功')
       setTimeout(() => router.back(), 800)
@@ -276,8 +294,6 @@ async function doReview(action) {
     showMyToast('操作失败')
   }
 }
-
-function onReviewFileRead() { /* Vant manages file list via v-model */ }
 
 function downloadFile(attachmentId) {
   window.open(getFileUrl(attachmentId), '_blank')
@@ -414,6 +430,13 @@ function downloadFile(attachmentId) {
   display: flex; gap: 12px; margin-top: 12px;
 }
 .action-buttons .van-button { flex: 1; }
+.review-files { margin-top: 8px; }
+.review-file-item {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #1989fa; cursor: pointer;
+  padding: 4px 10px; background: #f0f7ff; border-radius: 4px;
+  margin-right: 8px; margin-bottom: 4px;
+}
 .final-status {
   padding: 20px 16px;
   text-align: center;

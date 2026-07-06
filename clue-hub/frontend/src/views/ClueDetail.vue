@@ -122,6 +122,11 @@
             <span class="review-time">{{ formatDate(record.reviewedAt) }}</span>
           </div>
           <div v-if="record.comment" class="review-comment">{{ record.comment }}</div>
+          <div v-if="reviewAttachments[record.id]" class="review-files">
+            <div v-for="att in reviewAttachments[record.id]" :key="att.id" class="review-file-item" @click="downloadFile(att.id)">
+              <van-icon name="description" /> {{ att.originalName }}
+            </div>
+          </div>
         </div>
       </van-cell-group>
     </div>
@@ -145,15 +150,16 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue, uploadClueFile } from '../api'
+import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue, uploadClueFile, getReviewAttachments } from '../api'
 import { showConfirmDialog } from 'vant'
 
 const router = useRouter()
 const route = useRoute()
 const clue = ref(null)
 const reviewHistory = ref([])
+const reviewAttachments = ref({})
 const attachments = ref([])
 const supplementFiles = ref([])
 const submitting = ref(false)
@@ -246,7 +252,6 @@ function loadClueIntoForm(clueData) {
   form.productStatusDetail = clueData.productStatusDetail || ''
   if (clueData.supplementMaterialTypes) form.supplementMaterialTypesArr = clueData.supplementMaterialTypes.split(',')
   form.supplementInfo = clueData.supplementInfo || ''
-  console.log('loadClueIntoForm supplementInfo:', clueData.supplementInfo)
 }
 
 onMounted(async () => {
@@ -257,11 +262,19 @@ onMounted(async () => {
     ])
     if (clueRes.data.code === 0) {
       clue.value = clueRes.data.data
-      console.log('ClueDetail loaded:', clue.value.supplementInfo, 'status:', clue.value.status)
       loadClueIntoForm(clue.value)
-      await nextTick()
     }
-    if (historyRes.data.code === 0) reviewHistory.value = historyRes.data.data || []
+    if (historyRes.data.code === 0) {
+      reviewHistory.value = historyRes.data.data || []
+      const raMap = {}
+      await Promise.all(reviewHistory.value.map(async (r) => {
+        try {
+          const { data: attData } = await getReviewAttachments(r.id)
+          if (attData.code === 0 && attData.data.length) raMap[r.id] = attData.data
+        } catch (e) { /* ignore */ }
+      }))
+      reviewAttachments.value = raMap
+    }
     if (attRes.data.code === 0) attachments.value = attRes.data.data || []
   } catch (e) { console.error('加载失败', e) }
 })
@@ -479,6 +492,13 @@ function formatSize(bytes) {
 .review-action.return { color: #faad14; }
 .review-time { font-size: 12px; color: #999; margin-left: auto; }
 .review-comment { margin-top: 8px; font-size: 13px; color: #666; background: #f7f8fa; padding: 8px; border-radius: 4px; }
+.review-files { margin-top: 8px; }
+.review-file-item {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; color: #1989fa; cursor: pointer;
+  padding: 4px 10px; background: #f0f7ff; border-radius: 4px;
+  margin-right: 8px; margin-bottom: 4px;
+}
 
 .supplement-bar {
   display: flex;
