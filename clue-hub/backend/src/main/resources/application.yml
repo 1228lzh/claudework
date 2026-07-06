@@ -33,7 +33,7 @@ app:
     endpoint: http://minioqas.rifeng.com.cn:9000
     access-key: yxpt
     secret-key: FS234089
-    bucket: yxpt
+    bucket: ${APP_MINIO_BUCKET:yxpt}
   # 企微配置（待替换为实际值）
   wecom:
     corp-id: your_corp_id
