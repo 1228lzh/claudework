@@ -41,7 +41,7 @@
       <!-- 第三步：线索来源 -->
       <template v-if="currentStep === 2">
         <div class="field-label required">信息来源（可多选）</div>
-        <van-checkbox-group v-model="form.infoSourceArr">
+        <van-checkbox-group v-model="form.infoSourceArr" class="cb-vertical">
           <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">
             {{ item }}
           </van-checkbox>
@@ -332,7 +332,7 @@ function validateStep(step) {
       break
     case 4:
       if (!form.supplementMaterialTypesArr.length) { showMyToast('请至少选择一项补充材料类型'); return false }
-      if (!pendingFiles.value.length) { showMyToast('请至少上传一个附件'); return false }
+      if (!pendingFiles.value.length && !existingAttachments.value.length) { showMyToast('请至少上传一个附件'); return false }
       break
   }
   return true
@@ -507,6 +507,9 @@ function formatSize(bytes) {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+.cb-vertical {
+  display: block;
 }
 .van-checkbox {
   margin: 0;

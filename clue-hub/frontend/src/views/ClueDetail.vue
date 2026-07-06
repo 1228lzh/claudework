@@ -31,7 +31,7 @@
 
       <van-cell-group title="线索来源">
         <div class="field-label">信息来源（可多选）</div>
-        <van-checkbox-group v-if="isEditable" v-model="form.infoSourceArr" class="cb-group">
+        <van-checkbox-group v-if="isEditable" v-model="form.infoSourceArr" class="cb-vertical">
           <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
         </van-checkbox-group>
         <div v-else class="cb-group">
@@ -451,6 +451,7 @@ function formatSize(bytes) {
   flex-wrap: wrap;
   gap: 8px;
 }
+.cb-vertical { display: block; }
 .cb-group :deep(.van-checkbox) { margin: 0; }
 
 .cb-tag {
