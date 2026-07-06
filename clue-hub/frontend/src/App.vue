@@ -14,7 +14,17 @@ import { getCurrentUser } from './api/auth.js'
 const route = useRoute()
 const isAdminRoute = computed(() => route.path.startsWith('/admin'))
 
+// 从 URL 提取 jsessionid
+function extractSessionId() {
+  const m = window.location.href.match(/;jsessionid=([^?&#]+)/)
+  if (m) {
+    sessionStorage.setItem('jsessionid', m[1])
+  }
+  return sessionStorage.getItem('jsessionid')
+}
+
 onMounted(async () => {
+  extractSessionId()
   try {
     const { data } = await getCurrentUser()
     userStore.setUser(data)

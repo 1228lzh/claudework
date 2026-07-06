@@ -6,6 +6,12 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' }
 })
 
+api.interceptors.request.use(config => {
+  const sid = sessionStorage.getItem('jsessionid')
+  if (sid) config.headers['X-JSessionId'] = sid
+  return config
+})
+
 // ===== 线索相关 =====
 
 /** 提交线索 */

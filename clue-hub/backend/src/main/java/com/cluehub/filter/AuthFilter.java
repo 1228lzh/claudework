@@ -1,6 +1,8 @@
 package com.cluehub.filter;
 
 import com.cluehub.model.UserInfo;
+import com.cluehub.service.SessionStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import java.io.IOException;
 public class AuthFilter implements Filter {
 
     private static final String SESSION_USER_KEY = "currentUser";
+    @Autowired
+    private SessionStore sessionStore;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -28,20 +32,31 @@ public class AuthFilter implements Filter {
             return;
         }
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            UserInfo user = (UserInfo) session.getAttribute(SESSION_USER_KEY);
-            if (user != null) {
-                request.setAttribute("currentUser", user);
-                if (path.startsWith("/api/review") && !user.isAdmin()) {
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.setStatus(403);
-                    response.getWriter().write("{\"code\":403,\"message\":\"无管理员权限\"}");
-                    return;
-                }
-                chain.doFilter(req, res);
+        // 优先从 X-JSessionId Header 查找用户（绕过 Cookie SameSite 限制）
+        UserInfo user = null;
+        String headerSid = request.getHeader("X-JSessionId");
+        if (headerSid != null) {
+            user = sessionStore.get(headerSid);
+        }
+
+        // 回退到标准 Cookie Session
+        if (user == null) {
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                user = (UserInfo) session.getAttribute(SESSION_USER_KEY);
+            }
+        }
+
+        if (user != null) {
+            request.setAttribute("currentUser", user);
+            if (path.startsWith("/api/review") && !user.isAdmin()) {
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(403);
+                response.getWriter().write("{\"code\":403,\"message\":\"无管理员权限\"}");
                 return;
             }
+            chain.doFilter(req, res);
+            return;
         }
 
         response.sendRedirect(response.encodeRedirectURL("/auth/login"));
