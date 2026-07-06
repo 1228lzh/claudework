@@ -46,6 +46,9 @@ public class ClueSubmitDTO {
     /** 补充材料类型，多个用逗号分隔 */
     private String supplementMaterialTypes;
 
+    /** 补充材料-其他说明 */
+    private String supplementMaterialOther;
+
     /** 提交类型：submit=直接提交, draft=保存草稿 */
     private String action;
     /** 草稿记录ID（更新草稿时传入） */

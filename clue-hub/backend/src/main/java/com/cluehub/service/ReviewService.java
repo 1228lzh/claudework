@@ -21,15 +21,16 @@ import java.util.List;
  *   judging - 研判中
  *   verifying - 验证中
  *   ipd_review - IPD立项
+ *   launched - 已上市
  *   approved - 已通过
  *   {stage}_rejected - 各阶段不通过
  *
  * 流转：
  *   new → 提交 → initial_screening
- *   initial_screening → pass → judging | reject → initial_screening_rejected | return → new
+ *   initial_screening → pass → judging | reject → initial_screening_rejected | return → pending_supplement
  *   judging → pass → verifying | reject → judging_rejected
  *   verifying → pass → ipd_review | reject → verifying_rejected
- *   ipd_review → pass → approved | reject → ipd_review_rejected
+ *   ipd_review → pass → launched | reject → ipd_review_rejected
  */
 @Service
 @RequiredArgsConstructor
@@ -63,7 +64,8 @@ public class ReviewService {
             // 通过 → 进入下一阶段
             String nextStage = getNextStage(currentStatus);
             clue.setStatus(nextStage);
-            if ("ipd_review".equals(nextStage)) {
+            if ("launched".equals(nextStage)) {
+                // 通过 IPD立项时填写上市时间和完结时间
                 if (dto.getIpdApprovedAt() != null && !dto.getIpdApprovedAt().isEmpty()) {
                     clue.setIpdApprovedAt(LocalDateTime.parse(dto.getIpdApprovedAt()));
                 }
@@ -102,6 +104,7 @@ public class ReviewService {
         if ("initial_screening".equals(currentStatus)) return "judging";
         if ("judging".equals(currentStatus)) return "verifying";
         if ("verifying".equals(currentStatus)) return "ipd_review";
+        if ("ipd_review".equals(currentStatus)) return "launched";
         throw new RuntimeException("无法确定下一阶段：" + currentStatus);
     }
 }

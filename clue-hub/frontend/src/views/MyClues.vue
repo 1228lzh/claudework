@@ -44,10 +44,10 @@ const statusMap = {
   initial_screening: '初筛中',
   judging: '研判中',
   verifying: '验证中',
-  ipd_review: 'IPD立项',
+  ipd_review: 'IPD立项', launched: '已上市',
   initial_screening_rejected: '初筛不通过',
   judging_rejected: '研判不通过',
-  verifying_rejected: '验证不通过'
+  verifying_rejected: '验证不通过', ipd_review_rejected: 'IPD不通过'
 }
 
 function statusLabel(status) {

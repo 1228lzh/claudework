@@ -20,12 +20,14 @@
             @click="goToClue(clue)">
             <div class="clue-header">
               <span class="clue-no">{{ clue.clueNo }}</span>
-              <div class="clue-header-right">
+              <div>
                 <span :class="['stage-tag', clue.status]">{{ statusLabel(clue.status) }}</span>
-                <van-icon v-if="clue.status === 'initial_screening'" name="revoke" size="16" color="#faad14"
-                  class="delete-btn" @click.stop="onWithdraw(clue)" />
-                <van-icon v-if="clue.status === 'new'" name="delete-o" size="16" color="#999"
-                  class="delete-btn" @click.stop="onDelete(clue)" />
+                <div v-if="clue.status === 'initial_screening' || clue.status === 'new'" class="clue-actions">
+                  <span v-if="clue.status === 'initial_screening'" class="action-btn"
+                    @click.stop="onWithdraw(clue)">撤回</span>
+                  <span v-if="clue.status === 'new'" class="action-btn"
+                    @click.stop="onDelete(clue)">删除</span>
+                </div>
               </div>
             </div>
             <div class="clue-title">{{ clue.clueName }}</div>
@@ -64,6 +66,7 @@
         <van-cell title="研判中" :value="judgingCount + ' 条'" />
         <van-cell title="验证中" :value="verifyingCount + ' 条'" />
         <van-cell title="已立项" :value="approvedCount + ' 条'" />
+        <van-cell title="已上市" :value="launchedCount + ' 条'" />
       </van-cell-group>
 
       <van-cell-group title="设置" style="margin-top: 12px">
@@ -104,6 +107,9 @@ const verifyingCount = computed(() =>
 )
 const approvedCount = computed(() =>
   clues.value.filter(c => c.status === 'ipd_review').length
+)
+const launchedCount = computed(() =>
+  clues.value.filter(c => c.status === 'launched').length
 )
 
 const statusMap = {
@@ -224,16 +230,19 @@ watch(() => route.path, (path) => {
   margin-bottom: 8px;
 }
 .clue-no { font-size: 12px; color: #999; }
-.clue-header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.delete-btn {
-  padding: 2px;
-}
 .clue-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; color: #333; }
 .clue-meta { display: flex; justify-content: flex-end; font-size: 12px; color: #999; }
+.clue-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.action-btn {
+  font-size: 12px;
+  color: #1989fa;
+  cursor: pointer;
+}
 
 .fab-wrapper {
   position: fixed;

@@ -511,6 +511,9 @@ function formatSize(bytes) {
 .cb-vertical {
   display: block;
 }
+.cb-vertical .van-checkbox {
+  margin-bottom: 8px;
+}
 .van-checkbox {
   margin: 0;
 }

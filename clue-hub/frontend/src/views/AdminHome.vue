@@ -78,16 +78,17 @@ const tabs = [
   { key: 'initial_screening', label: '初筛中' },
   { key: 'judging', label: '研判中' },
   { key: 'verifying', label: '验证中' },
-  { key: 'ipd_review', label: 'IPD立项' }
+  { key: 'ipd_review', label: 'IPD立项' },
+  { key: 'launched', label: '已上市' }
 ]
 
 const statusMap = {
   new: '新建',
   pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
-  ipd_review: 'IPD立项',
+  ipd_review: 'IPD立项', launched: '已上市',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',
-  verifying_rejected: '验证不通过'
+  verifying_rejected: '验证不通过', ipd_review_rejected: 'IPD不通过'
 }
 
 const totalCount = computed(() => clues.value.length)

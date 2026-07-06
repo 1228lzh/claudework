@@ -72,6 +72,7 @@ html, body {
 .stage-tag.judging { background: #e6f7ff; color: #1890ff; }
 .stage-tag.verifying { background: #f9f0ff; color: #722ed1; }
 .stage-tag.ipd_review { background: #fff7e6; color: #d46b08; }
+.stage-tag.launched { background: #f6ffed; color: #389e0d; }
 .stage-tag.approved { background: #f6ffed; color: #52c41a; }
 .stage-tag.initial_screening_rejected,
 .stage-tag.judging_rejected,

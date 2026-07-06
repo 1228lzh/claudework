@@ -452,6 +452,7 @@ function formatSize(bytes) {
   gap: 8px;
 }
 .cb-vertical { display: block; }
+.cb-vertical :deep(.van-checkbox) { margin-bottom: 8px; }
 .cb-group :deep(.van-checkbox) { margin: 0; }
 
 .cb-tag {

@@ -112,6 +112,10 @@ public class Clue {
     @Column(length = 500)
     private String supplementMaterialTypes;
 
+    /** 补充材料-其他说明 */
+    @Column(length = 200)
+    private String supplementMaterialOther;
+
     // ===== 状态与审核 =====
     /**
      * 状态：
