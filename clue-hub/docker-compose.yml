@@ -20,10 +20,10 @@ services:
     expose:
       - "8080"
     environment:
-      # 数据库连接（容器内通过服务名 mysql 访问）
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/clue_hub?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER:-root}
-      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD:-root123456}
+      # 数据库连接
+      - SPRING_DATASOURCE_URL=${DB_URL:jdbc:mysql://mysql:3306/clue_hub?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-root}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-root123456}
       # 文件上传路径
       - APP_UPLOAD_PATH=/data/uploads
       # 企微配置
@@ -54,7 +54,7 @@ services:
     image: mysql:8.0
     container_name: clue-hub-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD:-root123456}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-root123456}
       - MYSQL_DATABASE=clue_hub
       - MYSQL_CHARSET=utf8mb4
       - MYSQL_COLLATION=utf8mb4_general_ci
@@ -64,7 +64,7 @@ services:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro  # 首次启动自动建表
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_PASSWORD:-root123456}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root123456}"]
       interval: 5s
       timeout: 5s
       retries: 10
