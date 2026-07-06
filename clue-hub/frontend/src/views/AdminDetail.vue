@@ -219,6 +219,10 @@ async function doReview(action) {
     showMyToast('请填写审核意见')
     return
   }
+  if (action === 'pass' && clue.value.status === 'verifying') {
+    if (!ipdApprovedDate.value) { showMyToast('请选择IPD立项时间'); return }
+    if (!completedDate.value) { showMyToast('请选择完结时间'); return }
+  }
   try {
     const { data } = await submitReview(clue.value.id, {
       action,
@@ -258,7 +262,7 @@ function downloadFile(attachmentId) {
 </script>
 
 <style scoped>
-.admin-detail { padding-bottom: 200px; background: #f5f7fa; min-height: 100vh; }
+.admin-detail { padding-bottom: 320px; background: #f5f7fa; min-height: 100vh; }
 
 @media (min-width: 768px) {
   .admin-detail { padding-bottom: 0; }
