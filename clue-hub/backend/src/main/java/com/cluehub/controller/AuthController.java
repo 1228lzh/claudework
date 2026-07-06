@@ -1,5 +1,6 @@
 package com.cluehub.controller;
 
+import com.cluehub.config.AdminListProvider;
 import com.cluehub.config.FeilianProperties;
 import com.cluehub.model.UserInfo;
 import com.cluehub.service.SessionRegistry;
@@ -37,6 +38,7 @@ public class AuthController {
     private final FeilianProperties feilian;
     private final SessionRegistry sessionRegistry;
     private final SessionStore sessionStore;
+    private final AdminListProvider adminListProvider;
     private final RestTemplate restTemplate = new RestTemplate();
     private static final String SESSION_USER_KEY = "currentUser";
     private final Map<String, String> stateStore = new ConcurrentHashMap<>();
@@ -92,7 +94,7 @@ public class AuthController {
             user.setFullname(userJson.has("fullname") ? userJson.get("fullname").asText() : "");
             user.setMobile(userJson.has("mobile") ? userJson.get("mobile").asText() : "");
             user.setEmail(userJson.has("email") ? userJson.get("email").asText() : "");
-            user.setAdmin(isAdminUser(user.getUserId()));
+            user.setAdmin(adminListProvider.isAdmin(user.getUserId()));
             log.info("User {} logged in, admin={}", user.getUserId(), user.isAdmin());
             session.setAttribute(SESSION_USER_KEY, user);
             sessionStore.put(session.getId(), user);
@@ -140,14 +142,5 @@ public class AuthController {
             return ResponseEntity.status(401).body("{\"code\":401,\"message\":\"未登录\"}");
         }
         return ResponseEntity.ok(user);
-    }
-
-    private boolean isAdminUser(String userId) {
-        String adminIds = feilian.getAdminIds();
-        if (adminIds == null || adminIds.isEmpty()) return false;
-        for (String id : adminIds.split(",")) {
-            if (id.trim().equals(userId)) return true;
-        }
-        return false;
     }
 }
