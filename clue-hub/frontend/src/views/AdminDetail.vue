@@ -84,8 +84,10 @@
 
         <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
         <template v-if="clue.status === 'verifying'">
-          <van-field v-model="ipdApprovedDate" label="IPD立项时间" type="date" placeholder="请选择" />
-          <van-field v-model="completedDate" label="完结时间" type="date" placeholder="请选择" />
+          <van-field v-model="ipdApprovedDate" label="IPD立项时间" placeholder="请选择" is-link readonly @click="openNativeDate('ipd')" />
+          <van-field v-model="completedDate" label="完结时间" placeholder="请选择" is-link readonly @click="openNativeDate('completed')" />
+          <input :ref="el => dateInputs.ipd = el" type="date" style="position:absolute;left:-9999px;opacity:0" @change="e => ipdApprovedDate = e.target.value" />
+          <input :ref="el => dateInputs.completed = el" type="date" style="position:absolute;left:-9999px;opacity:0" @change="e => completedDate = e.target.value" />
         </template>
 
         <div class="action-buttons">
@@ -135,6 +137,7 @@ const attachments = ref([])
 const reviewComment = ref('')
 const ipdApprovedDate = ref('')
 const completedDate = ref('')
+const dateInputs = reactive({ ipd: null, completed: null })
 const pendingReviewFiles = ref([])
 
 const form = reactive({
@@ -174,6 +177,10 @@ watch(ipdApprovedDate, (val) => {
     completedDate.value = d.toISOString().split('T')[0]
   }
 })
+
+function openNativeDate(target) {
+  if (dateInputs[target]) dateInputs[target].showPicker()
+}
 
 const canReview = computed(() => clue.value && reviewableStatuses.includes(clue.value.status))
 
