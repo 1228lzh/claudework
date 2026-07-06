@@ -69,6 +69,45 @@
         <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>
 
+      <!-- 补充材料类型 -->
+      <van-cell-group title="补充材料">
+        <div class="field-label">如有以下材料，请附上：</div>
+        <van-checkbox-group v-if="isEditable" v-model="form.supplementMaterialTypesArr" direction="horizontal" class="cb-group">
+          <van-checkbox v-for="item in supplementMaterialOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
+        </van-checkbox-group>
+        <div v-else class="cb-group">
+          <span v-for="item in supplementMaterialOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.supplementMaterialTypesArr.includes(item) }]">{{ item }}</span>
+        </div>
+      </van-cell-group>
+
+      <!-- 补充信息（待补充状态下可编辑，有数据时只读展示） -->
+      <van-cell-group v-if="isEditable" title="补充信息">
+        <div class="field-label">补充信息 <span style="color: #ee0a24;">*</span></div>
+        <div class="desc-textarea-wrapper">
+          <textarea v-model="form.supplementInfo" class="desc-textarea" rows="5"
+            placeholder="请根据审核意见补充所需信息" maxlength="500" />
+          <div class="desc-count">{{ (form.supplementInfo || '').length }} / 500</div>
+        </div>
+        <div class="field-label">补充附件 <span class="optional-hint">（选填）</span></div>
+        <div class="upload-wrapper">
+          <van-uploader
+            v-model="supplementFiles"
+            :after-read="onSupplementFileRead"
+            :before-delete="onSupplementFileDelete"
+            multiple
+            :max-count="5"
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+          />
+          <div class="upload-hint">支持图片、文档，单文件≤20MB</div>
+        </div>
+      </van-cell-group>
+
+      <van-cell-group v-if="!isEditable && form.supplementInfo" title="补充信息">
+        <div class="desc-textarea-wrapper">
+          <textarea :model-value="form.supplementInfo" class="desc-textarea" rows="5" readonly />
+        </div>
+      </van-cell-group>
+
       <!-- 附件 -->
       <van-cell-group v-if="attachments.length" title="附件">
         <van-cell v-for="att in attachments" :key="att.id" :title="att.originalName"
@@ -109,7 +148,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue } from '../api'
+import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue, uploadClueFile } from '../api'
 import { showConfirmDialog } from 'vant'
 
 const router = useRouter()
@@ -117,6 +156,7 @@ const route = useRoute()
 const clue = ref(null)
 const reviewHistory = ref([])
 const attachments = ref([])
+const supplementFiles = ref([])
 const submitting = ref(false)
 
 const isEditable = computed(() => clue.value?.status === 'pending_supplement')
@@ -126,7 +166,9 @@ const form = reactive({
   clueName: '', clueType: '', clueTypeOther: '', clueDesc: '',
   infoSourceArr: [], infoSourceOther: '', reliability: '', marketSize: '',
   productLinesArr: [], productLinesDetail: '', targetCustomersArr: [], targetCustomersOther: '',
-  urgency: '', productStatus: '', productStatusDetail: ''
+  urgency: '', productStatus: '', productStatusDetail: '',
+  supplementMaterialTypesArr: [],
+  supplementInfo: ''
 })
 
 const clueTypeOptions = ['新产品/新功能', '现有产品改进/新应用场景', '新应用场景/新行业拓展', '产品新动向/产品威胁', '政策/标准/法规变化', '客户/市场/技术突破', '其他']
@@ -136,6 +178,7 @@ const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃
 const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
 const urgencyOptions = ['紧迫（窗口期很短，3个月内需要响应）', '较急（建议尽快关注和行动）', '从容（可从容调研，1年以上窗口期）', '不确定']
 const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
+const supplementMaterialOptions = ['客户需求原始记录/邮件/聊天截图', '竞品产品照片/资料', '行业报告/政策文件', '相关技术资料', '其他']
 
 const showClueTypePicker = ref(false)
 const showReliabilityPicker = ref(false)
@@ -201,6 +244,8 @@ function loadClueIntoForm(clueData) {
   form.urgency = clueData.urgency || ''
   form.productStatus = clueData.productStatus || ''
   form.productStatusDetail = clueData.productStatusDetail || ''
+  if (clueData.supplementMaterialTypes) form.supplementMaterialTypesArr = clueData.supplementMaterialTypes.split(',')
+  form.supplementInfo = clueData.supplementInfo || ''
 }
 
 onMounted(async () => {
@@ -223,7 +268,7 @@ function buildPayload() {
     reporterName: form.reporterName,
     reporterDept: form.reporterDept,
     reporterContact: form.reporterContact,
-    wecomUserId: clue.value.wecomUserId || 'user_001',
+    wecomUserId: clue.value.wecomUserId || userStore.userId,
     clueName: form.clueName,
     clueType: form.clueType,
     clueTypeOther: form.clueTypeOther,
@@ -239,6 +284,8 @@ function buildPayload() {
     urgency: form.urgency,
     productStatus: form.productStatus,
     productStatusDetail: form.productStatusDetail,
+    supplementMaterialTypes: form.supplementMaterialTypesArr.join(','),
+    supplementInfo: form.supplementInfo,
     draftId: clue.value.id,
     action: 'save'
   }
@@ -259,6 +306,11 @@ async function saveCurrentDraft() {
 }
 
 async function onResubmit() {
+  // 待补充状态下，补充信息必填
+  if (!form.supplementInfo || !form.supplementInfo.trim()) {
+    showMyToast('请填写补充信息')
+    return
+  }
   submitting.value = true
   try {
     const payload = buildPayload()
@@ -278,6 +330,30 @@ async function onResubmit() {
 }
 
 function downloadFile(attachmentId) { window.open(getFileUrl(attachmentId), '_blank') }
+
+async function onSupplementFileRead(file) {
+  if (!clue.value || !clue.value.id) return
+  try {
+    const { data } = await uploadClueFile(clue.value.id, file.file)
+    if (data.code === 0) {
+      showMyToast('附件上传成功')
+      // 刷新附件列表
+      const attRes = await getClueAttachments(clue.value.id)
+      if (attRes.data.code === 0) attachments.value = attRes.data.data || []
+    } else {
+      showMyToast(data.message || '上传失败')
+      // 移除上传失败的文件
+      supplementFiles.value = supplementFiles.value.filter(f => f !== file)
+    }
+  } catch (e) {
+    showMyToast('上传失败，请重试')
+    supplementFiles.value = supplementFiles.value.filter(f => f !== file)
+  }
+}
+
+function onSupplementFileDelete(file) {
+  return true
+}
 
 function formatSize(bytes) {
   if (!bytes) return '0 B'
@@ -413,4 +489,18 @@ function formatSize(bytes) {
   margin: 0 auto;
 }
 .supplement-bar .van-button { flex: 1; }
+
+.upload-wrapper {
+  padding: 0 16px 12px;
+}
+.upload-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 8px;
+}
+.optional-hint {
+  font-size: 12px;
+  color: #999;
+  font-weight: 400;
+}
 </style>
