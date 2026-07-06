@@ -84,8 +84,8 @@
 
         <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
         <template v-if="clue.status === 'verifying'">
-          <van-field v-model="ipdApprovedDate" label="IPD立项时间" type="date" placeholder="请选择" />
-          <van-field v-model="completedDate" label="完结时间" type="date" placeholder="请选择" />
+          <van-field v-model="ipdApprovedDate" label="IPD立项时间" type="date" placeholder="请选择" is-link readonly clickable />
+          <van-field v-model="completedDate" label="完结时间" type="date" placeholder="请选择" is-link readonly clickable />
         </template>
 
         <div class="action-buttons">
@@ -262,7 +262,7 @@ function downloadFile(attachmentId) {
 </script>
 
 <style scoped>
-.admin-detail { padding-bottom: 320px; background: #f5f7fa; min-height: 100vh; }
+.admin-detail { padding-bottom: 380px; background: #f5f7fa; min-height: 100vh; box-sizing: border-box; }
 
 @media (min-width: 768px) {
   .admin-detail { padding-bottom: 0; }
