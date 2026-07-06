@@ -97,9 +97,8 @@
 
         <!-- 审核附件上传 -->
         <div class="review-upload">
-          <van-uploader :after-read="onReviewFileRead" multiple :max-count="5"
-            accept="*" upload-icon="plus" result-type="file"
-            @delete="onReviewFileDelete" />
+          <van-uploader v-model:file-list="pendingReviewFiles" :after-read="onReviewFileRead" multiple :max-count="5"
+            accept="*" upload-icon="plus" result-type="file" />
         </div>
 
         <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
@@ -278,13 +277,7 @@ async function doReview(action) {
   }
 }
 
-function onReviewFileRead(files) {
-  const items = Array.isArray(files) ? files : [files]
-  pendingReviewFiles.value.push(...items)
-}
-function onReviewFileDelete(file) {
-  pendingReviewFiles.value = pendingReviewFiles.value.filter(f => f !== file)
-}
+function onReviewFileRead() { /* Vant manages file list via v-model */ }
 
 function downloadFile(attachmentId) {
   window.open(getFileUrl(attachmentId), '_blank')
