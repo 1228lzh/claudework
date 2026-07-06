@@ -65,7 +65,7 @@
             {{ item }}
           </van-checkbox>
         </van-checkbox-group>
-        <van-field v-if="form.productLinesArr.includes('全品类')" v-model="form.productLinesDetail" label="全品类说明" placeholder="请说明具体品类" />
+        <van-field v-if="form.productLinesArr.includes('全新品类（具体）')" v-model="form.productLinesDetail" label="具体品类" placeholder="请说明具体品类" />
 
         <div class="field-label">目标客户群体（可多选）</div>
         <van-checkbox-group v-model="form.targetCustomersArr" direction="horizontal">
@@ -179,12 +179,12 @@ const form = reactive({
 })
 
 // 选择项配置
-const clueTypeOptions = ['新产品/新功能', '现有产品改进/新应用场景', '新应用场景/新行业拓展', '产品新动向/产品威胁', '政策/标准/法规变化', '客户/市场/技术突破', '其他']
-const infoSourceOptions = ['客户/业务直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '装修公司/施工方反馈', '行业同事反馈', '行业展会/论坛/交流', '产品观察/产品情报', '行业媒体/行业报告', '政策/标准/法规文件', '其他']
-const reliabilityOptions = ['高（多个独立来源可交叉验证）', '中（单一可靠来源，如老客户直接反馈）', '低（道听途说/网络偶然获取）']
-const productLineOptions = ['给水管道', '排水管道', '暖通管道', '燃气管道', '新风管道', '净水/水处理', '全品类']
-const customerOptions = ['房地产开发商', '施工单位', '设计院', '装修公司', '经销商', '最终用户', '工业用户', '其他']
-const urgencyOptions = ['紧迫（窗口期很短，3个月内需要响应）', '较急（建议尽快关注和行动）', '从容（可从容调研，1年以上窗口期）', '不确定']
+const clueTypeOptions = ['新产品/新规格需求', '现有产品改进/升级需求', '新应用场景/新领域机会', '竞品新动作/竞品威胁', '政策/标准/法规变化带来的机会', '技术/材料/工艺突破带来的机会', '其他']
+const infoSourceOptions = ['客户/业主直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '安装公司/施工方反馈', '销售同事反馈', '行业展会/论坛/会议', '竞品观察/竞品情报', '行业媒体/行业报告', '政策/标准/法规文件', '内部市场侦察小组', '其他']
+const reliabilityOptions = ['高——多个独立来源交叉验证', '中——单一可靠来源（如重点客户直接反馈）', '低——道听途说/单次偶然获取']
+const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '配件/接头类', '全新品类（具体）']
+const customerOptions = ['房地产开发商', '市政工程', '设计院', '安装公司', '经销商', '家装用户', '工业用户', '其他']
+const urgencyOptions = ['紧急——窗口期很短（3个月内需要响应）', '较急——半年内应该行动', '不急——可以从容评估（1年以上窗口期）', '不确定']
 const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
 const supplementMaterialOptions = ['客户需求原始记录/邮件/聊天截图', '竞品产品照片/资料', '行业报告/政策文件', '相关技术资料', '其他']
 
