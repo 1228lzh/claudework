@@ -25,8 +25,8 @@ public class ClueService {
      */
     private String generateClueNo() {
         String today = LocalDateTime.now().format(NO_FORMAT);
-        long count = clueRepository.count();
-        return String.format("CL%s%04d", today, (count + 1) % 10000);
+        String suffix = String.format("%04d", System.currentTimeMillis() % 10000);
+        return "CL" + today + suffix;
     }
 
     /**
