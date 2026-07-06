@@ -43,6 +43,7 @@ services:
       - APP_MINIO_SECRET_KEY=${APP_MINIO_SECRET_KEY}
     volumes:
       - uploads:/data/uploads
+      - ./backend/admin-users.txt:/app/admin-users.txt
     depends_on:
       mysql:
         condition: service_healthy
