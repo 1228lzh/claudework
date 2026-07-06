@@ -88,7 +88,7 @@
           <van-field v-model="completedDate" label="完结时间" placeholder="请选择" is-link @click="showDatePicker('completed')" />
         </template>
         <van-popup v-model:show="showPicker" position="bottom" round>
-          <van-datetime-picker v-model="pickerDate" type="date" :min-date="minDate"
+          <van-date-picker v-model="pickerDate" :min-date="minDate"
             @confirm="onDateConfirm" @cancel="showPicker = false" />
         </van-popup>
 
