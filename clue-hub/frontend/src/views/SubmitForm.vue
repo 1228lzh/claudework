@@ -41,7 +41,7 @@
       <!-- 第三步：线索来源 -->
       <template v-if="currentStep === 2">
         <div class="field-label required">信息来源（可多选）</div>
-        <van-checkbox-group v-model="form.infoSourceArr" direction="horizontal">
+        <van-checkbox-group v-model="form.infoSourceArr">
           <van-checkbox v-for="item in infoSourceOptions" :key="item" :name="item" shape="square">
             {{ item }}
           </van-checkbox>
