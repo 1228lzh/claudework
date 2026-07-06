@@ -46,6 +46,7 @@ export const getClueAttachments = (id) => api.get(`/clue/${id}/attachments`)
 
 /** 删除新建状态的线索 */
 export const deleteClue = (id) => api.delete(`/clue/${id}`)
+export const withdrawClue = (id) => api.put(`/clue/${id}/withdraw`)
 
 // ===== 审核相关 =====
 

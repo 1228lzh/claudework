@@ -17,13 +17,14 @@
       </van-cell-group>
 
       <van-cell-group title="什么线索">
-        <van-field v-model="form.clueName" label="线索名称" :readonly="!isEditable" :placeholder="isEditable ? '一句话描述，不超过50字' : ''" maxlength="50" />
+        <van-field v-model="form.clueName" label="线索名称" :readonly="!isEditable" :placeholder="isEditable ? `例：'某代理商自己在做包管包柱，投入不大有利润'` : ''" maxlength="50" />
         <van-field v-model="form.clueType" label="线索类型" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showClueTypePicker = true : null" :placeholder="isEditable ? '请选择线索类型' : ''" />
         <van-field v-if="form.clueType === '其他'" v-model="form.clueTypeOther" label="其他类型" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
         <div class="field-label">线索描述</div>
+        <div v-if="isEditable" class="desc-hint">说清楚"发现了什么"+"为什么觉得这是个机会"即可</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.clueDesc" class="desc-textarea" rows="5"
-            :placeholder="isEditable ? '3-5句话说明：是什么 + 为什么是机会' : ''" maxlength="500" :readonly="!isEditable" />
+            :placeholder="isEditable ? '请输入' : ''" maxlength="500" :readonly="!isEditable" />
           <div class="desc-count">{{ (form.clueDesc || '').length }} / 500</div>
         </div>
       </van-cell-group>
@@ -39,9 +40,10 @@
         <van-field v-if="form.infoSourceArr.includes('其他')" v-model="form.infoSourceOther" label="其他来源" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
         <van-field v-model="form.reliability" label="信息可靠度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showReliabilityPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
         <div class="field-label">预计市场规模</div>
+        <div v-if="isEditable" class="desc-hint">请描述预计市场规模、增长趋势及相关数据</div>
         <div class="desc-textarea-wrapper">
           <textarea v-model="form.marketSize" class="desc-textarea" rows="4"
-            :placeholder="isEditable ? '请描述预计市场规模、增长趋势及相关数据' : ''" maxlength="500" :readonly="!isEditable" />
+            :placeholder="isEditable ? '请输入' : ''" maxlength="500" :readonly="!isEditable" />
           <div class="desc-count">{{ (form.marketSize || '').length }} / 500</div>
         </div>
       </van-cell-group>
@@ -54,7 +56,7 @@
         <div v-else class="cb-group">
           <span v-for="item in productLineOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.productLinesArr.includes(item) }]">{{ item }}</span>
         </div>
-        <van-field v-if="form.productLinesArr.includes('全新品类（具体）')" v-model="form.productLinesDetail" label="具体品类" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体品类' : ''" />
+        <van-field v-if="form.productLinesArr.includes('全新品类（具体）') || form.productLinesArr.includes('其他')" v-model="form.productLinesDetail" label="具体品类" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体品类' : ''" />
         <div class="field-label">目标客户群体（可多选）</div>
         <van-checkbox-group v-if="isEditable" v-model="form.targetCustomersArr" direction="horizontal" class="cb-group">
           <van-checkbox v-for="item in customerOptions" :key="item" :name="item" shape="square">{{ item }}</van-checkbox>
@@ -65,8 +67,8 @@
         <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
         <van-field v-model="form.urgency" label="时间紧迫度" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showUrgencyPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
         <van-field v-model="form.productStatus" label="竞品情况" :is-link="isEditable" :readonly="!isEditable" @click="isEditable ? showProductStatusPicker = true : null" :placeholder="isEditable ? '请选择' : ''" />
-        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
-        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
+        <van-field v-if="form.productStatus === '竞品已经在做了'" v-model="form.productStatusDetail" label="哪家竞品" :readonly="!isEditable" :placeholder="isEditable ? '请说明具体竞品' : ''" />
+        <van-field v-if="clue.ipdApprovedAt" label="上市时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
       </van-cell-group>
 
       <!-- 补充材料类型 -->
@@ -78,6 +80,7 @@
         <div v-else class="cb-group">
           <span v-for="item in supplementMaterialOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.supplementMaterialTypesArr.includes(item) }]">{{ item }}</span>
         </div>
+        <van-field v-if="form.supplementMaterialTypesArr.includes('其他')" v-model="form.supplementMaterialOther" label="其他材料" :readonly="!isEditable" :placeholder="isEditable ? '请说明' : ''" />
       </van-cell-group>
 
       <!-- 补充信息（待补充状态下可编辑，有数据时只读展示） -->
@@ -154,6 +157,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getClueDetail, getReviewHistory, getClueAttachments, getFileUrl, saveClue, submitClue, uploadClueFile, getReviewAttachments } from '../api'
 import { showConfirmDialog } from 'vant'
+import { userStore } from '../stores/user.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -174,13 +178,14 @@ const form = reactive({
   productLinesArr: [], productLinesDetail: '', targetCustomersArr: [], targetCustomersOther: '',
   urgency: '', productStatus: '', productStatusDetail: '',
   supplementMaterialTypesArr: [],
+  supplementMaterialOther: '',
   supplementInfo: ''
 })
 
-const clueTypeOptions = ['新产品/新规格需求', '现有产品改进/升级需求', '新应用场景/新领域机会', '竞品新动作/竞品威胁', '政策/标准/法规变化带来的机会', '技术/材料/工艺突破带来的机会', '其他']
+const clueTypeOptions = ['新产品/新规格需求', '新应用场景/新领域机会', '竞品新动作/竞品威胁', '政策/标准/法规变化带来的机会', '技术/材料/工艺突破带来的机会', '其他']
 const infoSourceOptions = ['客户/业主直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '安装公司/施工方反馈', '销售同事反馈', '行业展会/论坛/会议', '竞品观察/竞品情报', '行业媒体/行业报告', '政策/标准/法规文件', '内部市场侦察小组', '其他']
 const reliabilityOptions = ['高——多个独立来源交叉验证', '中——单一可靠来源（如重点客户直接反馈）', '低——道听途说/单次偶然获取']
-const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '配件/接头类', '全新品类（具体）']
+const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '全新品类（具体）', '其他']
 const customerOptions = ['房地产开发商', '市政工程', '设计院', '安装公司', '经销商', '家装用户', '工业用户', '其他']
 const urgencyOptions = ['紧急——窗口期很短（3个月内需要响应）', '较急——半年内应该行动', '不急——可以从容评估（1年以上窗口期）', '不确定']
 const productStatusOptions = ['竞品已经在做了', '竞品还没做，但可能在关注', '市场上还没有人做', '不清楚']
@@ -204,12 +209,12 @@ const onSelectProductStatus = ({ name }) => { form.productStatus = name; showPro
 const statusMap = {
   new: '新建', pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
-  ipd_review: 'IPD立项',
+  ipd_review: 'IPD立项', launched: '已上市',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',
-  verifying_rejected: '验证不通过'
+  verifying_rejected: '验证不通过', ipd_review_rejected: 'IPD不通过'
 }
-const stageLabels = { initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项' }
-const actionLabels = { pass: '通过', reject: '不通过', return: '退回补充' }
+const stageLabels = { initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项', launched: '已上市' }
+const actionLabels = { pass: '通过', reject: '不通过', return: '退回补充', withdraw: '撤回' }
 
 function statusLabel(s) {
   const oldMap = { submitted: '待初筛(旧)', returned: '退回(旧)', rejected: '不通过(旧)', approved: '已通过(旧)', draft: '草稿(旧)' }
@@ -251,6 +256,7 @@ function loadClueIntoForm(clueData) {
   form.productStatus = clueData.productStatus || ''
   form.productStatusDetail = clueData.productStatusDetail || ''
   if (clueData.supplementMaterialTypes) form.supplementMaterialTypesArr = clueData.supplementMaterialTypes.split(',')
+  form.supplementMaterialOther = clueData.supplementMaterialOther || ''
   form.supplementInfo = clueData.supplementInfo || ''
 }
 
@@ -301,6 +307,7 @@ function buildPayload() {
     productStatus: form.productStatus,
     productStatusDetail: form.productStatusDetail,
     supplementMaterialTypes: form.supplementMaterialTypesArr.join(','),
+    supplementMaterialOther: form.supplementMaterialOther,
     supplementInfo: form.supplementInfo,
     draftId: clue.value.id,
     action: 'save'
@@ -403,7 +410,7 @@ function formatSize(bytes) {
   padding: 12px 16px 8px;
   font-size: 14px;
   color: #323233;
-  font-weight: 500;
+  font-weight: 600;
 }
 .desc-textarea-wrapper {
   margin: 0 16px;
@@ -432,6 +439,11 @@ function formatSize(bytes) {
   font-size: 12px;
   color: #999;
   background: #fff;
+}
+.desc-hint {
+  padding: 0 16px 8px;
+  font-size: 12px;
+  color: #999;
 }
 .cb-group {
   padding: 0 16px 12px;
@@ -490,6 +502,7 @@ function formatSize(bytes) {
 .review-action.pass { color: #52c41a; }
 .review-action.reject { color: #f5222d; }
 .review-action.return { color: #faad14; }
+.review-action.withdraw { color: #faad14; }
 .review-time { font-size: 12px; color: #999; margin-left: auto; }
 .review-comment { margin-top: 8px; font-size: 13px; color: #666; background: #f7f8fa; padding: 8px; border-radius: 4px; }
 .review-files { margin-top: 8px; }
@@ -525,5 +538,9 @@ function formatSize(bytes) {
   font-size: 12px;
   color: #999;
   font-weight: 400;
+}
+
+:deep(.van-field__label) {
+  font-weight: 600;
 }
 </style>

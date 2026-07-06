@@ -22,6 +22,8 @@
               <span class="clue-no">{{ clue.clueNo }}</span>
               <div class="clue-header-right">
                 <span :class="['stage-tag', clue.status]">{{ statusLabel(clue.status) }}</span>
+                <van-icon v-if="clue.status === 'initial_screening'" name="revoke" size="16" color="#faad14"
+                  class="delete-btn" @click.stop="onWithdraw(clue)" />
                 <van-icon v-if="clue.status === 'new'" name="delete-o" size="16" color="#999"
                   class="delete-btn" @click.stop="onDelete(clue)" />
               </div>
@@ -58,7 +60,9 @@
 
       <van-cell-group title="统计">
         <van-cell title="累计提报" :value="clues.length + ' 条'" />
-        <van-cell title="审核中" :value="inReviewCount + ' 条'" />
+        <van-cell title="初筛中" :value="initialScreeningCount + ' 条'" />
+        <van-cell title="研判中" :value="judgingCount + ' 条'" />
+        <van-cell title="验证中" :value="verifyingCount + ' 条'" />
         <van-cell title="已立项" :value="approvedCount + ' 条'" />
       </van-cell-group>
 
@@ -79,7 +83,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMyClues, deleteClue } from '../api'
+import { getMyClues, deleteClue, withdrawClue } from '../api'
 import { showToast, showSuccessToast, showFailToast, showConfirmDialog } from 'vant'
 import { userStore } from '../stores/user.js'
 
@@ -89,8 +93,14 @@ const activeTab = ref('clues')
 const clues = ref([])
 const refreshing = ref(false)
 
-const inReviewCount = computed(() =>
-  clues.value.filter(c => ['initial_screening', 'judging', 'verifying'].includes(c.status)).length
+const initialScreeningCount = computed(() =>
+  clues.value.filter(c => c.status === 'initial_screening').length
+)
+const judgingCount = computed(() =>
+  clues.value.filter(c => c.status === 'judging').length
+)
+const verifyingCount = computed(() =>
+  clues.value.filter(c => c.status === 'verifying').length
 )
 const approvedCount = computed(() =>
   clues.value.filter(c => c.status === 'ipd_review').length
@@ -100,9 +110,9 @@ const statusMap = {
   new: '新建',
   pending_supplement: '待补充',
   initial_screening: '初筛中', judging: '研判中', verifying: '验证中',
-  ipd_review: 'IPD立项',
+  ipd_review: 'IPD立项', launched: '已上市',
   initial_screening_rejected: '初筛不通过', judging_rejected: '研判不通过',
-  verifying_rejected: '验证不通过'
+  verifying_rejected: '验证不通过', ipd_review_rejected: 'IPD不通过'
 }
 
 function statusLabel(s) {
@@ -159,6 +169,27 @@ async function onDelete(clue) {
   } catch {
     loadClues()
     showFailToast('删除失败')
+  }
+}
+
+async function onWithdraw(clue) {
+  try {
+    await showConfirmDialog({
+      title: '确认撤回',
+      message: `确定撤回线索「${clue.clueNo}」吗？撤回后将变为新建状态。`,
+      confirmButtonText: '撤回',
+      cancelButtonText: '取消',
+    })
+  } catch {
+    return
+  }
+  try {
+    const { data } = await withdrawClue(clue.id)
+    if (data.code !== 0) throw new Error(data.message)
+    showSuccessToast('已撤回')
+    loadClues()
+  } catch {
+    showFailToast('撤回失败')
   }
 }
 

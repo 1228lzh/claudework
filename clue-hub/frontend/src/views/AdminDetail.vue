@@ -40,7 +40,7 @@
         <div class="cb-group">
           <span v-for="item in productLineOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.productLinesArr.includes(item) }]">{{ item }}</span>
         </div>
-        <van-field v-if="form.productLinesArr.includes('全新品类（具体）')" v-model="form.productLinesDetail" label="具体品类" readonly />
+        <van-field v-if="form.productLinesArr.includes('全新品类（具体）') || form.productLinesArr.includes('其他')" v-model="form.productLinesDetail" label="具体品类" readonly />
         <div class="field-label">目标客户群体（可多选）</div>
         <div class="cb-group">
           <span v-for="item in customerOptions" :key="item" :class="['cb-tag', { 'cb-tag--checked': form.targetCustomersArr.includes(item) }]">{{ item }}</span>
@@ -48,7 +48,7 @@
         <van-field v-if="form.targetCustomersArr.includes('其他')" v-model="form.targetCustomersOther" label="其他客户" readonly />
         <van-field v-model="form.urgency" label="时间紧迫度" readonly />
         <van-field v-model="form.productStatus" label="竞品情况" readonly />
-        <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家" readonly />
+        <van-field v-if="form.productStatusDetail" v-model="form.productStatusDetail" label="哪家竞品" readonly />
       </van-cell-group>
 
       <!-- 补充材料类型 -->
@@ -73,8 +73,8 @@
       </van-cell-group>
 
       <!-- 立项信息 -->
-      <van-cell-group v-if="clue.status === 'ipd_review' && (clue.ipdApprovedAt || clue.completedAt)" title="立项信息">
-        <van-field v-if="clue.ipdApprovedAt" label="IPD立项时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
+      <van-cell-group v-if="(clue.status === 'ipd_review' || clue.status === 'launched') && (clue.ipdApprovedAt || clue.completedAt)" title="立项信息">
+        <van-field v-if="clue.ipdApprovedAt" label="上市时间" :model-value="formatDate(clue.ipdApprovedAt)" readonly />
         <van-field v-if="clue.completedAt" label="完结时间" :model-value="formatDate(clue.completedAt)" readonly />
       </van-cell-group>
 
@@ -106,10 +106,10 @@
             accept="*" upload-icon="plus" result-type="file" />
         </div>
 
-        <!-- 验证通过时填写 IPD 立项时间和完结时间 -->
-        <template v-if="clue.status === 'verifying'">
+        <!-- IPD立项通过时填写上市时间和完结时间 -->
+        <template v-if="clue.status === 'ipd_review'">
           <div class="native-date-field">
-            <span class="native-date-label">IPD立项时间</span>
+            <span class="native-date-label">上市时间</span>
             <input v-model="ipdApprovedDate" type="date" class="native-date-input" />
           </div>
           <div class="native-date-field">
@@ -133,7 +133,7 @@
 
       <!-- 已终审提示 -->
       <div v-else class="final-status safe-bottom">
-        <span>此线索已{{ clue.status === 'ipd_review' ? 'IPD立项' : '结束' }}，无需审核操作</span>
+        <span>此线索已{{ clue.status === 'launched' ? '上市' : clue.status === 'ipd_review' ? 'IPD立项' : '结束' }}，无需审核操作</span>
       </div>
     </div>
   </div>
@@ -178,14 +178,14 @@ const form = reactive({
 })
 
 const infoSourceOptions = ['客户/业主直接反馈', '经销商/代理商反馈', '设计院/工程公司反馈', '安装公司/施工方反馈', '销售同事反馈', '行业展会/论坛/会议', '竞品观察/竞品情报', '行业媒体/行业报告', '政策/标准/法规文件', '内部市场侦察小组', '其他']
-const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '配件/接头类', '全新品类（具体）']
+const productLineOptions = ['给水领域', '排水领域', '暖通领域', '燃气领域', '市政领域', '全新品类（具体）', '其他']
 const customerOptions = ['房地产开发商', '市政工程', '设计院', '安装公司', '经销商', '家装用户', '工业用户', '其他']
 const supplementMaterialOptions = ['客户需求原始记录/邮件/聊天截图', '竞品产品照片/资料', '行业报告/政策文件', '相关技术资料', '其他']
 
 const stageLabels = {
-  initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项'
+  initial_screening: '初筛', judging: '研判', verifying: '验证', ipd_review: 'IPD立项', launched: '已上市'
 }
-const actionLabels = { pass: '通过', reject: '不通过', return: '退回补充' }
+const actionLabels = { pass: '通过', reject: '不通过', return: '退回补充', withdraw: '撤回' }
 
 function stageLabel(s) { return stageLabels[s] || s }
 function actionLabel(a) { return actionLabels[a] || a }
@@ -198,7 +198,7 @@ function formatSize(bytes) {
   return s.toFixed(1) + ' ' + u[i]
 }
 
-const reviewableStatuses = ['initial_screening', 'judging', 'verifying']
+const reviewableStatuses = ['initial_screening', 'judging', 'verifying', 'ipd_review']
 // IPD立项时间变更时，自动设置完结时间为三年后
 watch(ipdApprovedDate, (val) => {
   if (val) {
@@ -265,8 +265,8 @@ async function doReview(action) {
     showMyToast('请填写审核意见')
     return
   }
-  if (action === 'pass' && clue.value.status === 'verifying') {
-    if (!ipdApprovedDate.value) { showMyToast('请选择IPD立项时间'); return }
+  if (action === 'pass' && clue.value.status === 'ipd_review') {
+    if (!ipdApprovedDate.value) { showMyToast('请选择上市时间'); return }
     if (!completedDate.value) { showMyToast('请选择完结时间'); return }
   }
   try {
@@ -312,7 +312,7 @@ function downloadFile(attachmentId) {
   padding: 12px 16px 8px;
   font-size: 14px;
   color: #323233;
-  font-weight: 500;
+  font-weight: 600;
 }
 .desc-textarea-wrapper {
   margin: 0 16px;
@@ -396,6 +396,7 @@ function downloadFile(attachmentId) {
 .review-action.pass { color: #52c41a; }
 .review-action.reject { color: #f5222d; }
 .review-action.return { color: #faad14; }
+.review-action.withdraw { color: #faad14; }
 .review-time { font-size: 12px; color: #999; margin-left: auto; }
 .review-comment { margin-top: 8px; font-size: 13px; color: #666; background: #f7f8fa; padding: 8px; border-radius: 4px; }
 
@@ -454,5 +455,9 @@ function downloadFile(attachmentId) {
     position: static;
     max-width: none;
   }
+}
+
+:deep(.van-field__label) {
+  font-weight: 600;
 }
 </style>

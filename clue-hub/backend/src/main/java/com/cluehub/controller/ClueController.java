@@ -101,4 +101,11 @@ public class ClueController {
         clueService.deleteIfNew(id, getUserId(request));
         return ApiResponse.ok("已删除");
     }
+
+    /** 撤回初筛中的线索 */
+    @PutMapping("/{id}/withdraw")
+    public ApiResponse<?> withdraw(@PathVariable Long id, HttpServletRequest request) {
+        clueService.withdraw(id, getUserId(request));
+        return ApiResponse.ok("已撤回");
+    }
 }

@@ -2,7 +2,9 @@ package com.cluehub.service;
 
 import com.cluehub.dto.ClueSubmitDTO;
 import com.cluehub.entity.Clue;
+import com.cluehub.entity.ReviewRecord;
 import com.cluehub.repository.ClueRepository;
+import com.cluehub.repository.ReviewRecordRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ import java.util.Optional;
 public class ClueService {
 
     private final ClueRepository clueRepository;
+    private final ReviewRecordRepository reviewRecordRepository;
 
     private static final DateTimeFormatter NO_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -132,6 +135,7 @@ public class ClueService {
         clue.setProductStatusDetail(dto.getProductStatusDetail());
         clue.setSupplementInfo(dto.getSupplementInfo());
         clue.setSupplementMaterialTypes(dto.getSupplementMaterialTypes());
+        clue.setSupplementMaterialOther(dto.getSupplementMaterialOther());
     }
 
     /** 管理端：活跃审核中的线索 */
@@ -166,6 +170,7 @@ public class ClueService {
         clue.setReporterContact(dto.getReporterContact());
         clue.setSupplementInfo(dto.getSupplementInfo());
         clue.setSupplementMaterialTypes(dto.getSupplementMaterialTypes());
+        clue.setSupplementMaterialOther(dto.getSupplementMaterialOther());
         clue.setStatus("initial_screening");
         clue.setSubmittedAt(LocalDateTime.now());
         clue.setUpdatedBy(dto.getWecomUserId());
@@ -186,5 +191,34 @@ public class ClueService {
             throw new RuntimeException("无权删除此线索");
         }
         clueRepository.deleteById(id);
+    }
+
+    /**
+     * 撤回初筛中的线索 → 状态改回新建，并记录撤回日志
+     */
+    @Transactional
+    public void withdraw(Long id, String userId) {
+        Clue clue = clueRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("线索不存在"));
+        if (!"initial_screening".equals(clue.getStatus())) {
+            throw new RuntimeException("只能撤回初筛中的线索");
+        }
+        if (!userId.equals(clue.getWecomUserId())) {
+            throw new RuntimeException("无权撤回此线索");
+        }
+        clue.setStatus("new");
+        clue.setUpdatedBy(userId);
+        clueRepository.save(clue);
+
+        ReviewRecord record = ReviewRecord.builder()
+                .clueId(id)
+                .reviewStage("initial_screening")
+                .action("withdraw")
+                .comment("用户撤回")
+                .reviewerName(clue.getReporterName())
+                .createdBy(userId)
+                .updatedBy(userId)
+                .build();
+        reviewRecordRepository.save(record);
     }
 }
